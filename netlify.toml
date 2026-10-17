@@ -1,9 +1,10 @@
 [build]
-  # Static site: files live at the repository root, no build step needed.
-  publish = "."
+  # Static site: deployable files live in the "Anatomical 3D Model" folder,
+  # matching the publish directory configured in the Netlify UI. No build step.
+  publish = "Anatomical 3D Model"
 
-# Serve the main page at the site root (there is no index.html).
+# Keep the page's original URL working.
 [[redirects]]
-  from = "/"
-  to = "/Anatomical%203D%20Model.html"
-  status = 200
+  from = "/Anatomical%203D%20Model.html"
+  to = "/"
+  status = 301
