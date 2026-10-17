@@ -952,7 +952,122 @@ const SEXG = { male: new THREE.Group(), female: new THREE.Group() };
 SEXG.male.name = 'skin_male'; SEXG.female.name = 'skin_female'; SEXG.female.visible = false;
 G.skin.children.slice().forEach(o => SEXG.male.add(o)); G.skin.add(SEXG.male, SEXG.female);
 const reproM = new THREE.Group(); reproM.name = 'reproductive_male'; G.reproductive.children.slice().forEach(o => reproM.add(o)); G.reproductive.add(reproM);
+const reproF = new THREE.Group(); reproF.name = 'reproductive_female'; reproF.visible = false; G.reproductive.add(reproF);
 const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.name = 'fat_male'; FATG.female.name = 'fat_female'; FATG.female.visible = false; G.fat.add(FATG.male, FATG.female);
+{
+  const F = (name, mesh, label) => { const m = reg('reproductive', name, mesh, { label }); reproF.add(m); return m; };
+  const moveF = (...names) => names.forEach(name => { const m = G.reproductive.getObjectByName(name); if (m) reproF.add(m); });
+  const FM = {
+    soft: M('female_reproductive_soft', 0xc98a87, 0.5, { transparent: true, opacity: 0.92 }),
+    inner: M('female_reproductive_inner', 0xb56f71, 0.45, { transparent: true, opacity: 0.85 }),
+    duct: M('female_reproductive_duct', 0xe7cfba, 0.42),
+    vessel: M('female_reproductive_vessel', 0xc36f77, 0.45),
+    breast: M('female_breast', 0xd3a08f, 0.58, { transparent: true, opacity: 0.78, depthWrite: false, side: THREE.DoubleSide }),
+    breastCore: M('female_breast_core', 0xc47b6b, 0.55, { transparent: true, opacity: 0.88, depthWrite: false, side: THREE.DoubleSide }),
+    areola: M('female_areola', 0x8c4e44, 0.45),
+    nipple: M('female_nipple', 0x6f3b35, 0.42),
+    ligament: M('female_cooper_ligament', 0xeadccf, 0.72, { transparent: true, opacity: 0.45, depthWrite: false }),
+  };
+  const tubeF = (name, pts, r, mt, label) => {
+    const c = new THREE.CatmullRomCurve3(pts.map(p => p.isVector3 ? p.clone() : V(...p)));
+    const g = new THREE.TubeGeometry(c, Math.max(24, pts.length * 14), r, 12, false);
+    g.computeVertexNormals();
+    return F(name, new THREE.Mesh(g, mt), label);
+  };
+  const hollowEllipsoid = (rx, ry, rz, sc = 1) => {
+    const g = new THREE.SphereGeometry(1, 38, 26);
+    const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      const k = 1 + 0.12 * Math.exp(-((y - 0.25) ** 2) / 0.14) + 0.08 * Math.exp(-(z ** 2) / 0.5);
+      p.setXYZ(i, x * rx * k * sc, y * ry * sc, z * rz * sc);
+    }
+    g.computeVertexNormals();
+    return g;
+  };
+  // uterus, cervix and vagina
+  const uc = V(0, 0.845, 0.018);
+  {
+    const g = new THREE.SphereGeometry(1, 48, 30), p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+      const taper = 0.78 + 0.42 * Math.max(0, y + 0.2);
+      const antPost = 1 + 0.08 * Math.sin((y + 1) * Math.PI);
+      p.setXYZ(i, uc.x + x * 0.022 * taper, uc.y + y * 0.03, uc.z + z * 0.018 * antPost);
+    }
+    g.computeVertexNormals();
+    F('uterus', new THREE.Mesh(g, FM.soft), 'Uterus (womb)');
+  }
+  F('endometrium', new THREE.Mesh(hollowEllipsoid(0.013, 0.02, 0.009, 1), FM.inner), 'Endometrium').position.copy(uc).add(V(0, -0.002, 0.001));
+  F('myometrium', new THREE.Mesh(hollowEllipsoid(0.016, 0.024, 0.012, 1), FM.soft), 'Myometrium').position.copy(uc);
+  F('perimetrium', new THREE.Mesh(hollowEllipsoid(0.019, 0.027, 0.014, 1), FM.soft), 'Perimetrium').position.copy(uc).setZ(uc.z - 0.001);
+  const cervix = new THREE.CylinderGeometry(0.008, 0.006, 0.019, 28, 1);
+  cervix.rotateX(Math.PI / 2); cervix.translate(0, 0.807, 0.033);
+  F('cervix', new THREE.Mesh(cervix, FM.soft), 'Cervix');
+  tubeF('cervical_canal', [[0, 0.817, 0.027], [0, 0.809, 0.032], [0, 0.802, 0.037]], 0.0014, FM.inner, 'Cervical canal');
+  tubeF('vagina', [[0, 0.801, 0.039], [0, 0.79, 0.047], [0, 0.772, 0.058], [0, 0.748, 0.067]], 0.0082, FM.soft, 'Vagina');
+  sph('reproductive', 'vaginal_opening', 1, [0, 0.736, 0.072], FM.inner, { scale: [0.004, 0.0026, 0.006], label: 'Vaginal opening' });
+  moveF('vaginal_opening');
+  // ovaries and uterine tubes
+  for (const s of [-1, 1]) {
+    const sd = s < 0 ? 'right' : 'left';
+    const ov = new THREE.SphereGeometry(1, 30, 22);
+    ov.scale(0.0095, 0.012, 0.008);
+    ov.translate(s * 0.055, 0.842, 0.016);
+    F('ovary_' + sd, new THREE.Mesh(ov, FM.soft), 'Ovary (' + sd + ')');
+    tubeF('fallopian_tube_' + sd, [[s * 0.017, 0.858, 0.016], [s * 0.03, 0.86, 0.012], [s * 0.044, 0.852, 0.011], [s * 0.054, 0.844, 0.014]], 0.0022, FM.duct, 'Fallopian tube (' + sd + ')');
+    const fim = new THREE.ConeGeometry(0.0048, 0.007, 14, 1, true);
+    fim.rotateZ(-s * Math.PI / 2); fim.translate(s * 0.059, 0.844, 0.015);
+    F('fimbriae_' + sd, new THREE.Mesh(fim, FM.duct), 'Fimbriae (' + sd + ')');
+    for (let i = 0; i < 4; i++) sph('reproductive', 'ovarian_follicle_' + sd + '_' + i, 0.0018 + i * 0.00025, [s * (0.052 + 0.002 * Math.sin(i * 1.8)), 0.839 + 0.003 * i, 0.015 + 0.002 * Math.cos(i * 2.1)], FM.inner, { label: 'Ovarian follicle (' + sd + ')' });
+    tube('reproductive', 'ovarian_vessel_' + sd, [[s * 0.062, 0.878, 0.008], [s * 0.058, 0.861, 0.012], [s * 0.056, 0.848, 0.014]], 0.0012, FM.vessel, { label: 'Ovarian vessels (' + sd + ')' });
+    moveF('ovarian_follicle_' + sd + '_0', 'ovarian_follicle_' + sd + '_1', 'ovarian_follicle_' + sd + '_2', 'ovarian_follicle_' + sd + '_3', 'ovarian_vessel_' + sd);
+  }
+  // external genitalia
+  F('labia_majora', new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), FM.soft), 'Labia majora').position.set(0, 0.744, 0.074);
+  const lm = G.reproductive.getObjectByName('labia_majora'); lm.scale.set(0.018, 0.009, 0.011); lm.renderOrder = 2;
+  F('labia_minora', new THREE.Mesh(new THREE.SphereGeometry(1, 26, 18), FM.inner), 'Labia minora').position.set(0, 0.744, 0.076);
+  G.reproductive.getObjectByName('labia_minora').scale.set(0.011, 0.006, 0.007);
+  sph('reproductive', 'clitoris', 1, [0, 0.752, 0.079], FM.inner, { scale: [0.0032, 0.0028, 0.0032], label: 'Clitoris' });
+  sph('reproductive', 'urethral_opening_female', 1, [0, 0.7465, 0.078], FM.inner, { scale: [0.0016, 0.0012, 0.0016], label: 'Urethral opening (female)' });
+  moveF('clitoris', 'urethral_opening_female');
+  // bilateral breasts
+  for (const s of [-1, 1]) {
+    const sd = s < 0 ? 'right' : 'left';
+    const center = V(s * 0.092, 1.278, 0.108);
+    const outer = new THREE.SphereGeometry(1, 34, 24);
+    const op = outer.attributes.position;
+    for (let i = 0; i < op.count; i++) {
+      const x = op.getX(i), y = op.getY(i), z = op.getZ(i);
+      const drop = 1 + 0.22 * Math.max(0, -y);
+      op.setXYZ(i, center.x + x * 0.042 * drop, center.y + y * 0.048, center.z + z * 0.036 * (1 + 0.3 * Math.max(0, z)));
+    }
+    outer.computeVertexNormals();
+    F('breast_adipose_' + sd, new THREE.Mesh(outer, FM.breast), 'Breast adipose tissue (' + sd + ')');
+    sph('reproductive', 'nipple_' + sd, 1, [center.x, center.y - 0.008, center.z + 0.04], FM.nipple, { scale: [0.0042, 0.0042, 0.0055], label: 'Nipple (' + sd + ')' });
+    sph('reproductive', 'areola_' + sd, 1, [center.x, center.y - 0.0085, center.z + 0.035], FM.areola, { scale: [0.014, 0.014, 0.0022], label: 'Areola (' + sd + ')' });
+    tubeF('lactiferous_ducts_' + sd, [[center.x, center.y - 0.002, center.z - 0.004], [center.x, center.y - 0.006, center.z + 0.014], [center.x, center.y - 0.009, center.z + 0.031]], 0.0022, FM.breastCore, 'Lactiferous ducts (' + sd + ')');
+    for (let i = 0; i < 4; i++) sph('reproductive', 'breast_lobule_' + sd + '_' + i, 1, [center.x + s * (0.008 * Math.sin(i * 1.7)), center.y + 0.006 - 0.008 * i, center.z + 0.01 + 0.006 * Math.cos(i * 1.3)], FM.breastCore, { scale: [0.0075, 0.006, 0.0055], label: 'Breast lobule (' + sd + ')' });
+    for (let i = 0; i < 5; i++) tube('reproductive', 'cooper_ligament_' + sd + '_' + i, [[center.x + s * (0.002 * i - 0.004), center.y + 0.024 - 0.01 * i, center.z - 0.002], [center.x + s * (0.008 * i - 0.016), center.y + 0.004 - 0.012 * i, center.z + 0.02]], 0.0009, FM.ligament, { label: "Cooper's ligaments (" + sd + ')' });
+    tube('reproductive', 'axillary_tail_' + sd, [[center.x + s * 0.02, center.y + 0.01, center.z + 0.014], [center.x + s * 0.034, center.y + 0.032, center.z - 0.004], [center.x + s * 0.054, center.y + 0.05, center.z - 0.02]], 0.006, FM.breastCore, { label: 'Axillary tail of breast (' + sd + ')' });
+    tube('reproductive', 'breast_lymphatic_' + sd, [[center.x + s * 0.034, center.y + 0.032, center.z - 0.004], [center.x + s * 0.064, center.y + 0.06, center.z - 0.03], [center.x + s * 0.09, center.y + 0.08, center.z - 0.05]], 0.0012, FM.vessel, { label: 'Breast lymphatic vessel (' + sd + ')' });
+    moveF(
+      'nipple_' + sd,
+      'areola_' + sd,
+      'breast_lobule_' + sd + '_0',
+      'breast_lobule_' + sd + '_1',
+      'breast_lobule_' + sd + '_2',
+      'breast_lobule_' + sd + '_3',
+      'cooper_ligament_' + sd + '_0',
+      'cooper_ligament_' + sd + '_1',
+      'cooper_ligament_' + sd + '_2',
+      'cooper_ligament_' + sd + '_3',
+      'cooper_ligament_' + sd + '_4',
+      'axillary_tail_' + sd,
+      'breast_lymphatic_' + sd
+    );
+  }
+}
 let femaleOK = false;
 {
   model.updateMatrixWorld(true);
@@ -1361,15 +1476,30 @@ const SYSNAME = Object.fromEntries(SYS.map(s => [s.k, s.name]));
 let sq = false; const requestSlice = () => { if (sq) return; sq = true; requestAnimationFrame(() => { sq = false; renderSlice(); }); };
 {
   const row = list.querySelector('[data-k="reproductive"]'), note = $('sexnote');
+  const reproSys = SYS.find(x => x.k === 'reproductive');
+  const reproMaleInfo = { name: reproSys.name, blurb: reproSys.blurb, parts: [...reproSys.parts] };
+  const reproFemaleInfo = {
+    name: 'Reproductive (female and breast)',
+    blurb: 'Female reproductive organs include the ovaries, fallopian tubes, uterus, cervix and vagina, with the vulva externally. The breast model highlights glandular ducts and lobules, supportive ligaments, areola-nipple complex and the axillary tail.',
+    parts: ['#Female reproductive system', 'Ovary', 'Ovarian follicle', 'Fallopian tube', 'Fimbriae', 'Uterus (womb)', 'Perimetrium', 'Myometrium', 'Endometrium', 'Cervix', 'Cervical canal', 'Vagina', 'Labia majora', 'Labia minora', 'Clitoris', 'Urethral opening (female)', 'Vaginal opening',
+      '#Breast', 'Breast adipose tissue', 'Breast lobule', 'Lactiferous ducts', "Cooper's ligaments", 'Nipple', 'Areola', 'Axillary tail of breast', 'Breast lymphatic vessel']
+  };
+  const applyReproInfo = inf => {
+    reproSys.name = inf.name; reproSys.blurb = inf.blurb; reproSys.parts = inf.parts;
+    if (row) {
+      const nm = row.querySelector('.sname'); if (nm) nm.textContent = inf.name;
+      const cb = row.querySelector('input'); if (cb) cb.setAttribute('aria-label', 'Show ' + inf.name);
+    }
+  };
   const setSex = v => {
     if (v === 'female' && !femaleOK) v = 'male';
-    SEXG.male.visible = FATG.male.visible = v === 'male'; SEXG.female.visible = FATG.female.visible = v === 'female'; reproM.visible = v === 'male';
-    if (row) row.style.display = v === 'male' ? '' : 'none';
-    if (v === 'female' && sel === 'reproductive') { sel = 'skeletal'; showInfo(); }
+    SEXG.male.visible = FATG.male.visible = v === 'male'; SEXG.female.visible = FATG.female.visible = v === 'female'; reproM.visible = v === 'male'; reproF.visible = v === 'female';
+    applyReproInfo(v === 'female' ? reproFemaleInfo : reproMaleInfo);
     note.style.display = v === 'female' ? 'block' : 'none';
-    note.textContent = 'Female body surface over the shared internal model, which keeps male proportions, so some structures show through the skin. The male reproductive system is hidden.';
+    note.textContent = 'Female body surface is shown with dedicated female reproductive and breast structures.';
     $('p-sex').querySelectorAll('.b').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
     try { localStorage.setItem('anatomy-sex', v); } catch (e) {}
+    if (sel === 'reproductive') showInfo();
     requestSlice();
   };
   if (!femaleOK) { const fb = $('p-sex').querySelector('[data-v="female"]'); fb.disabled = true; fb.title = 'Female body could not be loaded'; }
