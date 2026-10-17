@@ -1,0 +1,10 @@
+[build]
+  # Static site: deployable files live in the "Anatomical 3D Model" folder,
+  # matching the publish directory configured in the Netlify UI. No build step.
+  publish = "Anatomical 3D Model"
+
+# Keep the page's original URL working.
+[[redirects]]
+  from = "/Anatomical%203D%20Model.html"
+  to = "/"
+  status = 301
