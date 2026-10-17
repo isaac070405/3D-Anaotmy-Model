@@ -1,0 +1,9 @@
+[build]
+  # Static site: files live at the repository root, no build step needed.
+  publish = "."
+
+# Serve the main page at the site root (there is no index.html).
+[[redirects]]
+  from = "/"
+  to = "/Anatomical%203D%20Model.html"
+  status = 200
