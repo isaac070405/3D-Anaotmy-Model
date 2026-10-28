@@ -5,7 +5,7 @@ Interactive three.js model of the human body (`Anatomical 3D Model.html`). Syste
 ## Interface
 
 - **Sidebar sections:** Find a part · Systems · Heart, lungs and diaphragm · Brain and spine views · Renal and reproductive · Upper limb · Lower limb · Peel layers · Dissect
-- **Preset views:** Heart view · Thorax · Lateral · Medial · Inferior · Spine · Reset · Kidneys · Kidneys from behind · Bladder and pelvis · Male reproductive · Male pelvis from the side · Shoulder and arm · Forearm and hand · Hip and thigh · Leg and foot
+- **Preset views:** Heart view · Thorax · Lateral · Medial · Inferior · Spine · Reset · Kidneys · Kidneys from behind · Bladder and pelvis · Male reproductive · Male pelvis from the side · Ovaries and uterus close-up (female) · Breast (female) · Breast from the side (female) · Shoulder and arm · Forearm and hand · Hip and thigh · Leg and foot
 - **Cross-section panel:** transverse / coronal / sagittal cut, slider position, zoom − / + / Fit, drag to pan, scroll to zoom, minimise (−), enlarge (⤢), close (×), optional cutting plane shown in the model, colour key per system.
 
 ## Systems and parts
@@ -112,10 +112,21 @@ _62 listed parts._
 
 _136 listed parts._
 
+### Reproductive (female and breast)
+
+- **Internal organs:** Ovary, Ovarian follicle, Dominant (Graafian) follicle, Released oocyte, Corpus luteum, Fallopian tube, Fimbriae, Uterus (womb), Perimetrium, Myometrium, Endometrium, Cervix, Cervical canal, Vagina
+- **Vulva:** Labia majora, Labia minora, Clitoris, Urethral opening (female), Vaginal opening
+- **Breast, glandular:** 16 lobes and lobules per breast, Acini (milk-producing alveoli), Lactiferous ducts
+- **Breast, supportive:** Breast adipose tissue, Fibrous connective tissue, Cooper's ligaments, Retromammary space and pectoral fascia
+- **Breast, surface:** Nipple, Areola, Montgomery's glands, Axillary tail
+- **Breast, vessels, nerves and lymph:** Axillary lymph nodes, Breast lymphatic vessel, Internal thoracic artery branches, Lateral thoracic artery branches, Intercostal nerve branches. Pectoralis major sits under the breast in the Muscular system.
+
 ## Modelling notes
 
 - Organ sizes run about 60–80% of textbook measurements so neighbouring structures fit without overlap.
 - Vessels that join major trunks (renal, testicular, gut arteries) belong to Circulatory so connections stay intact when systems are hidden.
 - Translucent walls (kidney cortex, stomach, bladder, prostate, scrotum) expose internal structure; subsurface effects are approximated with sheen and clearcoat.
 - Fine surface textures (gastric pits, filiform papillae, skin micro-rugae) are omitted because textures don't survive OBJ export.
-- Reproductive system is male only; penis shown flaccid.
+- Reproductive system has male and female variants, switched with the Sex control; penis shown flaccid.
+- The female body mesh (`uploads/Female_Muscular_BaseMesh`) is not in the repository. Without it the generic body surface stays on, minus the male genitalia, and the female structures still show.
+- The menstrual cycle slider (day 1 to 28) changes endometrial thickness, the dominant follicle on the right ovary, the released oocyte on day 14 and the corpus luteum in the luteal phase.

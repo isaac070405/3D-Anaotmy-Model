@@ -198,7 +198,12 @@
 
   <div class="sec">
     <h2>Renal and reproductive</h2>
-    <div class="vb"><button class="b" data-v="kidneys">Kidneys</button><button class="b" data-v="kidneysback">Kidneys from behind</button><button class="b" data-v="pelvis">Bladder and pelvis</button><button class="b" data-v="repro">Reproductive organs</button><button class="b" data-v="reproside">Reproductive pelvis from the side</button><button class="b" data-v="reset">Reset</button></div>
+    <div class="vb"><button class="b" data-v="kidneys">Kidneys</button><button class="b" data-v="kidneysback">Kidneys from behind</button><button class="b" data-v="pelvis">Bladder and pelvis</button><button class="b" data-v="repro">Reproductive organs</button><button class="b" data-v="reproside">Reproductive pelvis from the side</button><button class="b" data-v="cycle">Ovaries and uterus close-up (female)</button><button class="b" data-v="breast">Breast (female)</button><button class="b" data-v="breastside">Breast from the side (female)</button><button class="b" data-v="reset">Reset</button></div>
+    <div id="cyclebox" style="display:none">
+      <label for="cycleday" style="font-size:12px">Menstrual cycle, day <b id="cycledayn">1</b> of 28: <span id="cyclephase">Menstruation</span></label>
+      <input type="range" id="cycleday" min="1" max="28" step="1" value="1" aria-label="Menstrual cycle day">
+      <p id="cyclenote" style="font-size:12px;line-height:1.45;margin:6px 0 0"></p>
+    </div>
   </div>
 
   <div class="sec">
