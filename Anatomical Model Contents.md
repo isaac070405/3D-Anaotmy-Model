@@ -4,7 +4,7 @@ Interactive three.js model of the human body (`Anatomical 3D Model.html`). Syste
 
 ## Interface
 
-- **Sidebar sections:** Find a part · Systems · Heart, lungs and diaphragm · Brain and spine views · Renal and reproductive · Upper limb · Lower limb · Peel layers · Dissect
+- **Sidebar sections:** Find a part · Systems · Heart, lungs and diaphragm · Brain and spine views · Body layers, skin to bone · Renal and reproductive · Upper limb · Lower limb · Peel layers · Dissect
 - **Preset views:** Heart view · Thorax · Lateral · Medial · Inferior · Spine · Reset · Kidneys · Kidneys from behind · Bladder and pelvis · Male reproductive · Male pelvis from the side · Ovaries and uterus close-up (female) · Breast (female) · Breast from the side (female) · Shoulder and arm · Forearm and hand · Hip and thigh · Leg and foot
 - **Cross-section panel:** transverse / coronal / sagittal cut, slider position, zoom − / + / Fit, drag to pan, scroll to zoom, minimise (−), enlarge (⤢), close (×), optional cutting plane shown in the model, colour key per system.
 
@@ -120,6 +120,14 @@ _136 listed parts._
 - **Breast, supportive:** Breast adipose tissue, Fibrous connective tissue, Cooper's ligaments, Retromammary space and pectoral fascia
 - **Breast, surface:** Nipple, Areola, Montgomery's glands, Axillary tail
 - **Breast, vessels, nerves and lymph:** Axillary lymph nodes, Breast lymphatic vessel, Internal thoracic artery branches, Lateral thoracic artery branches, Intercostal nerve branches. Pectoralis major sits under the breast in the Muscular system.
+
+### Body layers (skin to bone)
+
+`layers.html` opens the explorer on the layers panel. A depth slider peels 14 layers from the outside in, and each layer has its own toggle.
+
+1. Skin · 2. Superficial veins · 3. Investing fascia · 4. Superficial muscles · 5. Second muscle group · 6. Intermediate muscles · 7. Deep muscles · 8. Deepest muscles · 9. Visceral coverings · 10. Anterior organs · 11. Deep organs · 12. Deep nerves and vessels · 13. Capsules and ligaments · 14. Bones and cartilage
+
+`layers.js` assigns each mesh to a layer by system and label (`layerOf`), so new structures land in a layer by name.
 
 ## Modelling notes
 

@@ -36,6 +36,13 @@
   .lede{font-size:13px;line-height:1.5;margin:0 0 14px;text-align:justify;hyphens:auto}
   h2{font-family:var(--font-heading);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700);margin:0 0 6px}
   .sec{border-top:1px solid var(--color-divider);padding:12px 0}
+  #layerssec.hl{outline:2px solid var(--color-accent-200);outline-offset:4px;border-radius:6px}
+  #lycur{font-size:12px;margin:6px 0 8px;color:var(--color-neutral-700)}
+  .ly{display:grid;grid-template-columns:18px 12px 1fr auto;gap:8px;align-items:start;padding:5px 0;border-top:1px solid var(--color-divider);cursor:pointer;font-size:13px}
+  .ly .lyn{font-size:11px;color:var(--color-neutral-700);padding-top:2px}
+  .ly .sw{width:12px;height:12px;border-radius:50%;margin-top:3px;border:1px solid rgba(0,0,0,.15)}
+  .ly .lyt small{display:block;font-size:11px;line-height:1.35;color:var(--color-neutral-700);margin-top:1px}
+  .ly.off{opacity:.55}
   .sys{display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:2px;cursor:pointer}
   .sys:hover{background:var(--color-accent-100)}
   .sys.sel{background:var(--color-accent-200)}
@@ -223,6 +230,15 @@
     <div class="vb" id="p-present" style="margin-bottom:0"><button class="b" data-v="off">Explore</button><button class="b" data-v="on">Turntable</button></div>
   </div>
 
+  <div class="sec" id="layerssec">
+    <h2>Body layers, skin to bone</h2>
+    <input type="range" id="lyslider" min="0" max="13" step="1" value="0" aria-label="Peel body layers from skin to bone">
+    <div class="tick"><span>Skin</span><span>Muscles</span><span>Organs</span><span>Bone</span></div>
+    <p id="lycur">Outermost visible: Skin</p>
+    <div class="vb"><button class="b" id="lyall">Show all layers</button><button class="b" id="lyreset">Reset</button></div>
+    <div id="lylist"></div>
+  </div>
+
   <div class="sec">
     <h2>Peel layers</h2>
     <input type="range" id="peel" min="0" max="3" step="1" value="0" aria-label="Peel layers from skin to bone">
@@ -267,5 +283,6 @@
 <script src="three-d-stage.js"></script>
 <script type="module" src="anatomy-part1.js"></script>
 <script type="module" src="anatomy-part2.js"></script>
+<script type="module" src="layers.js"></script>
 </body>
 </html>
