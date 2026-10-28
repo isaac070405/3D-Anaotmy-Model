@@ -1,4 +1,5 @@
 import { stage, THREE, V, model, SYS, G, M, mat, reg, xf, sph, box, Y, seg, tube, SK, zc, skPt, MS, mm, belly, SU, DP, __nextMcount } from './anatomy-part1.js';
+import './anatomy-extras.js';
 
 
 // ───────── URINARY ─────────
@@ -962,11 +963,32 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
     inner: M('female_reproductive_inner', 0xb56f71, 0.45, { transparent: true, opacity: 0.85 }),
     duct: M('female_reproductive_duct', 0xe7cfba, 0.42),
     vessel: M('female_reproductive_vessel', 0xc36f77, 0.45),
-    breast: M('female_breast', 0xd3a08f, 0.58, { transparent: true, opacity: 0.78, depthWrite: false, side: THREE.DoubleSide }),
+    breast: M('female_breast', 0xd3a08f, 0.58, { transparent: true, opacity: 0.42, depthWrite: false, side: THREE.DoubleSide }),
     breastCore: M('female_breast_core', 0xc47b6b, 0.55, { transparent: true, opacity: 0.88, depthWrite: false, side: THREE.DoubleSide }),
     areola: M('female_areola', 0x8c4e44, 0.45),
     nipple: M('female_nipple', 0x6f3b35, 0.42),
     ligament: M('female_cooper_ligament', 0xeadccf, 0.72, { transparent: true, opacity: 0.45, depthWrite: false }),
+    wall: M('female_uterine_wall', 0xc98a87, 0.5, { transparent: true, opacity: 0.28, depthWrite: false }),
+    endo: M('female_endometrium', 0xb04a55, 0.45, { transparent: true, opacity: 0.88 }),
+    follicle: M('female_graafian_follicle', 0xe9d4a8, 0.3, { transparent: true, opacity: 0.8 }),
+    luteum: M('female_corpus_luteum', 0xe3b23c, 0.5),
+    oocyte: M('female_oocyte', 0xfff4d6, 0.25),
+    acini: M('female_acini', 0xe0a07a, 0.5),
+    fibrous: M('female_breast_fibrous', 0xe4d3c0, 0.7, { transparent: true, opacity: 0.32, depthWrite: false, side: THREE.DoubleSide }),
+    node: M('female_lymph_node', 0x8fae83, 0.55),
+    gland: M('female_montgomery_gland', 0xa9645a, 0.5),
+  };
+  // merges many small spheres into one geometry, so a breast holds 16 lobes of acini without hundreds of draw calls
+  const sphereCluster = (pts, r) => {
+    const pos = [], idx = []; let base = 0;
+    pts.forEach(p => {
+      const g = new THREE.SphereGeometry(r, 8, 6), a = g.attributes.position;
+      for (let i = 0; i < a.count; i++) pos.push(a.getX(i) + p[0], a.getY(i) + p[1], a.getZ(i) + p[2]);
+      g.index.array.forEach(k => idx.push(k + base)); base += a.count; g.dispose();
+    });
+    const out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); out.setIndex(idx); out.computeVertexNormals();
+    return out;
   };
   const tubeF = (name, pts, r, mt, label) => {
     const c = new THREE.CatmullRomCurve3(pts.map(p => p.isVector3 ? p.clone() : V(...p)));
@@ -996,11 +1018,11 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
       p.setXYZ(i, uc.x + x * 0.022 * taper, uc.y + y * 0.03, uc.z + z * 0.018 * antPost);
     }
     g.computeVertexNormals();
-    F('uterus', new THREE.Mesh(g, FM.soft), 'Uterus (womb)');
+    F('uterus', new THREE.Mesh(g, FM.wall), 'Uterus (womb)');
   }
-  F('endometrium', new THREE.Mesh(hollowEllipsoid(0.013, 0.02, 0.009, 1), FM.inner), 'Endometrium').position.copy(uc).add(V(0, -0.002, 0.001));
-  F('myometrium', new THREE.Mesh(hollowEllipsoid(0.016, 0.024, 0.012, 1), FM.soft), 'Myometrium').position.copy(uc);
-  F('perimetrium', new THREE.Mesh(hollowEllipsoid(0.019, 0.027, 0.014, 1), FM.soft), 'Perimetrium').position.copy(uc).setZ(uc.z - 0.001);
+  F('endometrium', new THREE.Mesh(hollowEllipsoid(0.013, 0.02, 0.009, 1), FM.endo), 'Endometrium').position.copy(uc).add(V(0, -0.002, 0.001));
+  F('myometrium', new THREE.Mesh(hollowEllipsoid(0.016, 0.024, 0.012, 1), FM.wall), 'Myometrium').position.copy(uc);
+  F('perimetrium', new THREE.Mesh(hollowEllipsoid(0.019, 0.027, 0.014, 1), FM.wall), 'Perimetrium').position.copy(uc).setZ(uc.z - 0.001);
   const cervix = new THREE.CylinderGeometry(0.008, 0.006, 0.019, 28, 1);
   cervix.rotateX(Math.PI / 2); cervix.translate(0, 0.807, 0.033);
   F('cervix', new THREE.Mesh(cervix, FM.soft), 'Cervix');
@@ -1022,6 +1044,13 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
     for (let i = 0; i < 4; i++) sph('reproductive', 'ovarian_follicle_' + sd + '_' + i, 0.0018 + i * 0.00025, [s * (0.052 + 0.002 * Math.sin(i * 1.8)), 0.839 + 0.003 * i, 0.015 + 0.002 * Math.cos(i * 2.1)], FM.inner, { label: 'Ovarian follicle (' + sd + ')' });
     tube('reproductive', 'ovarian_vessel_' + sd, [[s * 0.062, 0.878, 0.008], [s * 0.058, 0.861, 0.012], [s * 0.056, 0.848, 0.014]], 0.0012, FM.vessel, { label: 'Ovarian vessels (' + sd + ')' });
     moveF('ovarian_follicle_' + sd + '_0', 'ovarian_follicle_' + sd + '_1', 'ovarian_follicle_' + sd + '_2', 'ovarian_follicle_' + sd + '_3', 'ovarian_vessel_' + sd);
+    // the cycle shows on the right ovary: the dominant follicle matures and ruptures, then becomes the corpus luteum
+    if (s < 0) {
+      const ovc = [s * 0.055, 0.842, 0.016];
+      F('graafian_follicle', new THREE.Mesh(new THREE.SphereGeometry(1, 26, 18), FM.follicle), 'Dominant (Graafian) follicle').position.set(ovc[0] + s * 0.003, ovc[1] + 0.002, ovc[2] + 0.004);
+      F('corpus_luteum', new THREE.Mesh(new THREE.SphereGeometry(1, 22, 16), FM.luteum), 'Corpus luteum').position.set(ovc[0] + s * 0.003, ovc[1] + 0.002, ovc[2] + 0.004);
+      F('oocyte', new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), FM.oocyte), 'Released oocyte').position.set(s * 0.058, 0.846, 0.017);
+    }
   }
   // external genitalia
   F('labia_majora', new THREE.Mesh(new THREE.SphereGeometry(1, 28, 20), FM.soft), 'Labia majora').position.set(0, 0.744, 0.074);
@@ -1032,6 +1061,7 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
   sph('reproductive', 'urethral_opening_female', 1, [0, 0.7465, 0.078], FM.inner, { scale: [0.0016, 0.0012, 0.0016], label: 'Urethral opening (female)' });
   moveF('clitoris', 'urethral_opening_female');
   // bilateral breasts
+  const PI2 = Math.PI * 2;
   for (const s of [-1, 1]) {
     const sd = s < 0 ? 'right' : 'left';
     const center = V(s * 0.092, 1.278, 0.108);
@@ -1046,18 +1076,40 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
     F('breast_adipose_' + sd, new THREE.Mesh(outer, FM.breast), 'Breast adipose tissue (' + sd + ')');
     sph('reproductive', 'nipple_' + sd, 1, [center.x, center.y - 0.008, center.z + 0.04], FM.nipple, { scale: [0.0042, 0.0042, 0.0055], label: 'Nipple (' + sd + ')' });
     sph('reproductive', 'areola_' + sd, 1, [center.x, center.y - 0.0085, center.z + 0.035], FM.areola, { scale: [0.014, 0.014, 0.0022], label: 'Areola (' + sd + ')' });
-    tubeF('lactiferous_ducts_' + sd, [[center.x, center.y - 0.002, center.z - 0.004], [center.x, center.y - 0.006, center.z + 0.014], [center.x, center.y - 0.009, center.z + 0.031]], 0.0022, FM.breastCore, 'Lactiferous ducts (' + sd + ')');
-    for (let i = 0; i < 4; i++) sph('reproductive', 'breast_lobule_' + sd + '_' + i, 1, [center.x + s * (0.008 * Math.sin(i * 1.7)), center.y + 0.006 - 0.008 * i, center.z + 0.01 + 0.006 * Math.cos(i * 1.3)], FM.breastCore, { scale: [0.0075, 0.006, 0.0055], label: 'Breast lobule (' + sd + ')' });
+    // 16 radial lobes (the text range is 15 to 20): each has a lactiferous duct from the nipple, a lobule, and a cluster of acini
+    const nip = [center.x, center.y - 0.008, center.z + 0.036], NL = 16;
+    for (let i = 0; i < NL; i++) {
+      const th = (i / NL) * PI2 + 0.2, ca = Math.cos(th), sa = Math.sin(th), rr = 0.026 + 0.004 * Math.sin(i * 2.3);
+      const lob = [center.x + rr * ca, nip[1] + rr * sa * 1.05, center.z - 0.006 + 0.004 * Math.cos(i * 1.9)];
+      const mid = [nip[0] + (lob[0] - nip[0]) * 0.35, nip[1] + (lob[1] - nip[1]) * 0.35, center.z + 0.014];
+      tubeF('lactiferous_duct_' + sd + '_' + i, [nip, mid, lob], 0.0009, FM.duct, 'Lactiferous ducts (' + sd + ')');
+      const lobule = F('breast_lobe_' + sd + '_' + i, new THREE.Mesh(new THREE.SphereGeometry(1, 16, 12), FM.breastCore), 'Breast lobe and lobule (' + sd + ')');
+      lobule.position.set(...lob); lobule.scale.set(0.0058, 0.0058, 0.004); lobule.lookAt(nip[0], nip[1], nip[2]);
+      const ac = [];
+      for (let k = 0; k < 7; k++) { const a = k * 2.399, rd = 0.0045 * Math.sqrt((k + 1) / 7); ac.push([lob[0] + rd * Math.cos(a), lob[1] + rd * Math.sin(a), lob[2] - 0.0035 - 0.001 * (k % 3)]); }
+      F('breast_acini_' + sd + '_' + i, new THREE.Mesh(sphereCluster(ac, 0.0017), FM.acini), 'Acini (milk-producing alveoli) (' + sd + ')');
+    }
+    // fibrous connective tissue envelope, retromammary space and the chest-wall relations
+    const stroma = new THREE.SphereGeometry(1, 30, 20), sp = stroma.attributes.position;
+    for (let i = 0; i < sp.count; i++) { const x = sp.getX(i), y = sp.getY(i), z = sp.getZ(i), dr = 1 + 0.22 * Math.max(0, -y); sp.setXYZ(i, center.x + x * 0.034 * dr, center.y + y * 0.04, center.z + z * 0.03 * (1 + 0.3 * Math.max(0, z))); }
+    stroma.computeVertexNormals();
+    F('breast_fibrous_tissue_' + sd, new THREE.Mesh(stroma, FM.fibrous), 'Fibrous connective tissue (breast, ' + sd + ')');
+    F('retromammary_space_' + sd, new THREE.Mesh(new THREE.CircleGeometry(0.044, 36), FM.fibrous), 'Retromammary space and pectoral fascia (' + sd + ')').position.set(center.x, center.y, center.z - 0.036);
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * PI2 + 0.3, mg = F('montgomery_gland_' + sd + '_' + i, new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), FM.gland), "Montgomery's glands (" + sd + ')'); mg.position.set(center.x + 0.0105 * Math.cos(a), center.y - 0.0085 + 0.0105 * Math.sin(a), center.z + 0.0362); mg.scale.setScalar(0.0013); }
+    tubeF('internal_thoracic_branch_' + sd, [[s * 0.03, center.y + 0.05, center.z - 0.04], [s * 0.05, center.y + 0.015, center.z - 0.034], [center.x - s * 0.02, center.y - 0.004, center.z - 0.02]], 0.0013, FM.vessel, 'Internal thoracic artery branches (' + sd + ')');
+    tubeF('lateral_thoracic_branch_' + sd, [[center.x + s * 0.09, center.y + 0.07, center.z - 0.05], [center.x + s * 0.052, center.y + 0.032, center.z - 0.02], [center.x + s * 0.016, center.y + 0.002, center.z + 0.004]], 0.0013, FM.vessel, 'Lateral thoracic artery branches (' + sd + ')');
+    tubeF('intercostal_nerve_' + sd, [[center.x + s * 0.06, center.y - 0.03, center.z - 0.07], [center.x + s * 0.035, center.y - 0.012, center.z - 0.034], [center.x + s * 0.005, center.y - 0.006, center.z + 0.02]], 0.0011, mat.nerve, 'Intercostal nerve branches (' + sd + ')');
+    for (let i = 0; i < 5; i++) {
+      const t = i / 4, nd = F('axillary_node_' + sd + '_' + i, new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), FM.node), 'Axillary lymph nodes (' + sd + ')');
+      nd.position.set(center.x + s * (0.066 + 0.026 * t), center.y + 0.062 + 0.02 * t, center.z - 0.032 - 0.02 * t + 0.004 * Math.sin(i * 2));
+      nd.scale.set(0.0052, 0.0034, 0.0034);
+    }
     for (let i = 0; i < 5; i++) tube('reproductive', 'cooper_ligament_' + sd + '_' + i, [[center.x + s * (0.002 * i - 0.004), center.y + 0.024 - 0.01 * i, center.z - 0.002], [center.x + s * (0.008 * i - 0.016), center.y + 0.004 - 0.012 * i, center.z + 0.02]], 0.0009, FM.ligament, { label: "Cooper's ligaments (" + sd + ')' });
     tube('reproductive', 'axillary_tail_' + sd, [[center.x + s * 0.02, center.y + 0.01, center.z + 0.014], [center.x + s * 0.034, center.y + 0.032, center.z - 0.004], [center.x + s * 0.054, center.y + 0.05, center.z - 0.02]], 0.006, FM.breastCore, { label: 'Axillary tail of breast (' + sd + ')' });
     tube('reproductive', 'breast_lymphatic_' + sd, [[center.x + s * 0.034, center.y + 0.032, center.z - 0.004], [center.x + s * 0.064, center.y + 0.06, center.z - 0.03], [center.x + s * 0.09, center.y + 0.08, center.z - 0.05]], 0.0012, FM.vessel, { label: 'Breast lymphatic vessel (' + sd + ')' });
     moveF(
       'nipple_' + sd,
       'areola_' + sd,
-      'breast_lobule_' + sd + '_0',
-      'breast_lobule_' + sd + '_1',
-      'breast_lobule_' + sd + '_2',
-      'breast_lobule_' + sd + '_3',
       'cooper_ligament_' + sd + '_0',
       'cooper_ligament_' + sd + '_1',
       'cooper_ligament_' + sd + '_2',
@@ -1067,6 +1119,27 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
       'breast_lymphatic_' + sd
     );
   }
+  // menstrual cycle: day 1 to 28 drives endometrial thickness, the dominant follicle, ovulation and the corpus luteum
+  const endoM = reproF.getObjectByName('endometrium'), folM = reproF.getObjectByName('graafian_follicle'), cl = reproF.getObjectByName('corpus_luteum'), ooc = reproF.getObjectByName('oocyte');
+  const lerp = (a, b, t) => a + (b - a) * Math.min(1, Math.max(0, t));
+  window.__cycle = day => {
+    day = Math.min(28, Math.max(1, Math.round(day)));
+    const menses = day <= 5, foll = day > 5 && day < 14, ovul = day === 14, lut = day > 14;
+    const phase = menses ? 'Menstruation' : foll ? 'Follicular phase' : ovul ? 'Ovulation' : 'Luteal phase';
+    // endometrium: shed over days 1-5, regrows (proliferative) to day 14, thickest and secretory in the luteal phase
+    const k = menses ? lerp(0.5, 0.3, (day - 1) / 4) : day < 14 ? lerp(0.3, 0.75, (day - 5) / 9) : lerp(0.8, 1, (day - 14) / 8);
+    endoM.scale.set(k, 1, k); FM.endo.color.setHex(menses ? 0xc03a3f : lut ? 0xd2706a : 0xb04a55);
+    // follicle: small early, dominant from about day 7, 20 mm at ovulation, then ruptured
+    const fr = day < 14 ? lerp(0.0022, 0.0085, (day - 5) / 9) : 0.0085;
+    folM.visible = !lut; folM.scale.setScalar(Math.max(0.001, fr));
+    cl.visible = lut; cl.scale.setScalar(day < 22 ? lerp(0.0045, 0.0065, (day - 15) / 7) : lerp(0.0065, 0.0025, (day - 22) / 6));
+    FM.luteum.color.setHex(day < 22 ? 0xe3b23c : 0xc99a4a);
+    // the oocyte leaves the follicle on day 14 and sits at the fimbriae for the next day
+    ooc.visible = ovul; ooc.scale.setScalar(0.0014);
+    const hormone = menses ? 'Estrogen and progesterone are low, so the uterine lining sheds through the vagina.' : foll ? 'FSH matures a follicle that secretes estrogen, and the uterine lining thickens.' : ovul ? 'A surge in luteinizing hormone (LH) releases the mature egg into the fallopian tube.' : 'The corpus luteum secretes progesterone. If fertilization does not happen, the lining sheds at the end of the cycle.';
+    return { day, phase, hormone };
+  };
+  window.__cycle(1);
 }
 let femaleOK = false;
 {
@@ -1388,7 +1461,7 @@ stage.addEventListener('pointermove', e => {
   ray.setFromCamera(pt, stage._camera);
   const meshes = []; model.traverse(o => { if (o.isMesh && o.userData.label && vis(o)) meshes.push(o); });
   const hits = ray.intersectObjects(meshes, false);
-  const h = hits.find(x => x.object.userData.sys !== 'skin') || hits[0];
+  const h = hits.find(x => x.object.userData.sys !== 'skin' && !x.object.userData.passive) || hits.find(x => x.object.userData.sys !== 'skin') || hits[0];
   if (!h) { tip.style.display = 'none'; return; }
   tip.textContent = h.object.userData.label; tip.style.display = 'block';
   tip.style.left = e.clientX + 14 + 'px'; tip.style.top = e.clientY + 14 + 'px';
@@ -1404,6 +1477,9 @@ const LIMB = ['skeletal', 'muscular', 'circulatory', 'nervous'];
 const REG = {
   kidneys: { keep: ['urinary', 'circulatory'], cam: [0, 1.05, 0.42], tgt: [0, 1.03, -0.05], sel: 'urinary' },
   kidneysback: { keep: ['urinary', 'circulatory', 'skeletal'], cam: [0, 1.06, -0.5], tgt: [0, 1.03, -0.05], sel: 'urinary' },
+  cycle: { keep: ['reproductive'], cam: [0.04, 0.85, 0.3], tgt: [0, 0.83, 0.02], sel: 'reproductive' },
+  breast: { keep: ['reproductive', 'skeletal', 'muscular', 'circulatory', 'nervous'], cam: [0, 1.28, 0.6], tgt: [0, 1.27, 0.08], sel: 'reproductive' },
+  breastside: { keep: ['reproductive', 'skeletal', 'muscular', 'circulatory', 'nervous'], cam: [0.62, 1.28, 0.1], tgt: [0.09, 1.27, 0.08], sel: 'reproductive' },
   repro: { keep: ['reproductive', 'urinary', 'skeletal'], cam: [0.07, 0.86, 0.4], tgt: [0, 0.8, 0.06], sel: 'reproductive' },
   reproside: { keep: ['reproductive', 'urinary', 'skeletal'], cam: [0.36, 0.82, 0.07], tgt: [0, 0.81, 0.05], sel: 'reproductive' },
   pelvis: { keep: ['urinary', 'skeletal'], cam: [0.06, 0.97, 0.36], tgt: [0, 0.85, 0.03], sel: 'urinary' },
@@ -1413,7 +1489,7 @@ const REG = {
   foot: { keep: LIMB, cam: [0.42, 0.28, 0.52], tgt: [0.1, 0.18, 0.03], sel: 'muscular' },
 };
 // each view keeps only its own region and frames it in the middle of the screen
-const BOX = { kidneys: [[-0.15, 0.88, -0.15], [0.15, 1.2, 0.1]], kidneysback: [[-0.15, 0.88, -0.15], [0.15, 1.2, 0.1]], repro: [[-0.12, 0.7, -0.1], [0.12, 0.95, 0.15]], reproside: [[-0.12, 0.7, -0.1], [0.12, 0.95, 0.15]],
+const BOX = { cycle: [[-0.1, 0.72, -0.05], [0.1, 0.9, 0.1]], breast: [[-0.2, 1.17, -0.12], [0.2, 1.4, 0.16]], breastside: [[-0.02, 1.17, -0.12], [0.2, 1.4, 0.16]], kidneys: [[-0.15, 0.88, -0.15], [0.15, 1.2, 0.1]], kidneysback: [[-0.15, 0.88, -0.15], [0.15, 1.2, 0.1]], repro: [[-0.12, 0.7, -0.1], [0.12, 0.95, 0.15]], reproside: [[-0.12, 0.7, -0.1], [0.12, 0.95, 0.15]],
   pelvis: [[-0.16, 0.76, -0.12], [0.16, 1.0, 0.12]], arm: [[0.12, 1.0, -0.12], [0.33, 1.5, 0.1]], hand: [[0.2, 0.6, -0.08], [0.42, 0.9, 0.1]], thigh: [[0.0, 0.42, -0.12], [0.22, 0.95, 0.12]],
   foot: [[0.02, -0.02, -0.1], [0.22, 0.48, 0.2]], thorax: [[-0.2, 1.08, -0.15], [0.2, 1.45, 0.15]], lateral: [[-0.1, 1.53, -0.12], [0.1, 1.76, 0.12]], medial: [[-0.1, 1.53, -0.12], [0.1, 1.76, 0.12]],
   inferior: [[-0.1, 1.53, -0.12], [0.1, 1.76, 0.12]], spine: [[-0.08, 0.75, -0.13], [0.08, 1.6, 0.0]] };
@@ -1480,9 +1556,13 @@ let sq = false; const requestSlice = () => { if (sq) return; sq = true; requestA
   const reproMaleInfo = { name: reproSys.name, blurb: reproSys.blurb, parts: [...reproSys.parts] };
   const reproFemaleInfo = {
     name: 'Reproductive (female and breast)',
-    blurb: 'Female reproductive organs include the ovaries, fallopian tubes, uterus, cervix and vagina, with the vulva externally. The breast model highlights glandular ducts and lobules, supportive ligaments, areola-nipple complex and the axillary tail.',
-    parts: ['#Female reproductive system', 'Ovary', 'Ovarian follicle', 'Fallopian tube', 'Fimbriae', 'Uterus (womb)', 'Perimetrium', 'Myometrium', 'Endometrium', 'Cervix', 'Cervical canal', 'Vagina', 'Labia majora', 'Labia minora', 'Clitoris', 'Urethral opening (female)', 'Vaginal opening',
-      '#Breast', 'Breast adipose tissue', 'Breast lobule', 'Lactiferous ducts', "Cooper's ligaments", 'Nipple', 'Areola', 'Axillary tail of breast', 'Breast lymphatic vessel']
+    blurb: 'Female reproductive organs include the ovaries, fallopian tubes, uterus, cervix and vagina, with the vulva externally. Move the menstrual cycle slider (day 1 to 28) to see the lining thicken, a follicle mature, ovulation and the corpus luteum. The breast model has 16 radial lobes, each with a lactiferous duct, a lobule and acini, set in fat and fibrous tissue held by the suspensory ligaments of Cooper, with the nipple-areola complex, axillary tail, lymph nodes, vessels and nerves.',
+    parts: ['#Female reproductive system', 'Ovary', 'Ovarian follicle', 'Dominant (Graafian) follicle', 'Released oocyte', 'Corpus luteum', 'Fallopian tube', 'Fimbriae', 'Uterus (womb)', 'Perimetrium', 'Myometrium', 'Endometrium', 'Cervix', 'Cervical canal', 'Vagina',
+      '#Vulva (external)', 'Labia majora', 'Labia minora', 'Clitoris', 'Urethral opening (female)', 'Vaginal opening',
+      '#Breast: glandular', 'Breast lobe and lobule', 'Acini (milk-producing alveoli)', 'Lactiferous ducts',
+      '#Breast: supportive', 'Breast adipose tissue', 'Fibrous connective tissue (breast)', "Cooper's ligaments", 'Retromammary space and pectoral fascia',
+      '#Breast: surface', 'Nipple', 'Areola', "Montgomery's glands", 'Axillary tail of breast',
+      '#Breast: vessels, nerves, lymph', 'Axillary lymph nodes', 'Breast lymphatic vessel', 'Internal thoracic artery branches', 'Lateral thoracic artery branches', 'Intercostal nerve branches']
   };
   const applyReproInfo = inf => {
     reproSys.name = inf.name; reproSys.blurb = inf.blurb; reproSys.parts = inf.parts;
@@ -1492,17 +1572,22 @@ let sq = false; const requestSlice = () => { if (sq) return; sq = true; requestA
     }
   };
   const setSex = v => {
-    if (v === 'female' && !femaleOK) v = 'male';
-    SEXG.male.visible = FATG.male.visible = v === 'male'; SEXG.female.visible = FATG.female.visible = v === 'female'; reproM.visible = v === 'male'; reproF.visible = v === 'female';
+    // without the female body mesh the built skin stays on (minus the male genitalia), so the female structures still show
+    const maleSkin = v === 'male' || !femaleOK;
+    SEXG.male.visible = FATG.male.visible = maleSkin; SEXG.female.visible = FATG.female.visible = v === 'female' && femaleOK; reproM.visible = v === 'male'; reproF.visible = v === 'female';
+    SEXG.male.children.forEach(o => { if (/^(scrotum|penis)/.test(o.name)) o.visible = v === 'male'; });
     applyReproInfo(v === 'female' ? reproFemaleInfo : reproMaleInfo);
     note.style.display = v === 'female' ? 'block' : 'none';
-    note.textContent = 'Female body surface is shown with dedicated female reproductive and breast structures.';
+    note.textContent = femaleOK ? 'Female body surface is shown with dedicated female reproductive and breast structures.' : 'The female body mesh is not loaded, so the generic body surface is shown with the female reproductive and breast structures. Peel the skin layer to see them.';
+    document.querySelectorAll('[data-v="breast"],[data-v="breastside"],[data-v="cycle"]').forEach(b => { b.style.display = v === 'female' ? '' : 'none'; });
+    $('cyclebox').style.display = v === 'female' ? 'block' : 'none';
     $('p-sex').querySelectorAll('.b').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
     try { localStorage.setItem('anatomy-sex', v); } catch (e) {}
     if (sel === 'reproductive') showInfo();
     requestSlice();
   };
-  if (!femaleOK) { const fb = $('p-sex').querySelector('[data-v="female"]'); fb.disabled = true; fb.title = 'Female body could not be loaded'; }
+  const cycleUi = () => { const r = window.__cycle(+$('cycleday').value); $('cycledayn').textContent = r.day; $('cyclephase').textContent = r.phase; $('cyclenote').textContent = r.hormone; requestSlice(); };
+  $('cycleday').addEventListener('input', () => { const cb = document.querySelector('.vb .b[data-v="cycle"]'); if (cb && !cb.classList.contains('on')) cb.click(); cycleUi(); }); cycleUi();
   $('p-sex').addEventListener('click', e => { const b = e.target.closest('.b'); if (b && !b.disabled) setSex(b.dataset.v); });
   let s0 = 'male'; try { s0 = localStorage.getItem('anatomy-sex') || 'male'; } catch (e) {}
   setSex(s0);
@@ -1564,7 +1649,7 @@ const removed = [];
 function dcount() { const n = removed.filter(r => r.some(m => !m.visible)).length; $('dcount').textContent = n ? n + ' removed · last: ' + removed[removed.length - 1][0].userData.label : 'Nothing removed'; $('undo').disabled = !removed.length; }
 $('undo').onclick = () => { const r = removed.pop(); if (r) r.forEach(m => { m.visible = true; }); dcount(); requestSlice(); };
 $('restore').onclick = () => { removed.splice(0).forEach(r => r.forEach(m => { m.visible = true; })); dcount(); requestSlice(); };
-dcount();
+dcount(); window.__removed = removed; window.__dcount = dcount;
 let down = null;
 stage.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 stage.addEventListener('pointerup', e => {
@@ -1574,7 +1659,8 @@ stage.addEventListener('pointerup', e => {
   const rc = stage._renderer.domElement.getBoundingClientRect();
   pt.set(((e.clientX - rc.left) / rc.width) * 2 - 1, -((e.clientY - rc.top) / rc.height) * 2 + 1); ray.setFromCamera(pt, stage._camera);
   const ms = []; model.traverse(o => { if (o.isMesh && o.userData.label && vis(o) && o.userData.sys !== 'skin') ms.push(o); });
-  const h = ray.intersectObjects(ms, false)[0]; if (!h) return;
+  const hs = ray.intersectObjects(ms, false), h = (e.altKey ? hs[0] : hs.find(x => !x.object.userData.passive)) || hs[0]; if (!h) return; // fascial sleeves are see-through: pick the structure behind them (Alt picks the sleeve)
+  if (window.__select) { window.__select(h.object); tip.style.display = 'none'; return; }
   const lab = h.object.userData.label, grp = ms.filter(m => m.userData.label === lab);
   grp.forEach(m => { m.visible = false; }); removed.push(grp); tip.style.display = 'none'; dcount(); requestSlice();
 });

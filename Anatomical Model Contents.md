@@ -4,8 +4,8 @@ Interactive three.js model of the human body (`Anatomical 3D Model.html`). Syste
 
 ## Interface
 
-- **Sidebar sections:** Find a part · Systems · Heart, lungs and diaphragm · Brain and spine views · Renal and reproductive · Upper limb · Lower limb · Peel layers · Dissect
-- **Preset views:** Heart view · Thorax · Lateral · Medial · Inferior · Spine · Reset · Kidneys · Kidneys from behind · Bladder and pelvis · Male reproductive · Male pelvis from the side · Shoulder and arm · Forearm and hand · Hip and thigh · Leg and foot
+- **Sidebar sections:** Find a part · Systems · Heart, lungs and diaphragm · Brain and spine views · Body layers, skin to bone · Renal and reproductive · Upper limb · Lower limb · Peel layers · Dissect
+- **Preset views:** Heart view · Thorax · Lateral · Medial · Inferior · Spine · Reset · Kidneys · Kidneys from behind · Bladder and pelvis · Male reproductive · Male pelvis from the side · Ovaries and uterus close-up (female) · Breast (female) · Breast from the side (female) · Shoulder and arm · Forearm and hand · Hip and thigh · Leg and foot
 - **Cross-section panel:** transverse / coronal / sagittal cut, slider position, zoom − / + / Fit, drag to pan, scroll to zoom, minimise (−), enlarge (⤢), close (×), optional cutting plane shown in the model, colour key per system.
 
 ## Systems and parts
@@ -112,10 +112,46 @@ _62 listed parts._
 
 _136 listed parts._
 
+### Reproductive (female and breast)
+
+- **Internal organs:** Ovary, Ovarian follicle, Dominant (Graafian) follicle, Released oocyte, Corpus luteum, Fallopian tube, Fimbriae, Uterus (womb), Perimetrium, Myometrium, Endometrium, Cervix, Cervical canal, Vagina
+- **Vulva:** Labia majora, Labia minora, Clitoris, Urethral opening (female), Vaginal opening
+- **Breast, glandular:** 16 lobes and lobules per breast, Acini (milk-producing alveoli), Lactiferous ducts
+- **Breast, supportive:** Breast adipose tissue, Fibrous connective tissue, Cooper's ligaments, Retromammary space and pectoral fascia
+- **Breast, surface:** Nipple, Areola, Montgomery's glands, Axillary tail
+- **Breast, vessels, nerves and lymph:** Axillary lymph nodes, Breast lymphatic vessel, Internal thoracic artery branches, Lateral thoracic artery branches, Intercostal nerve branches. Pectoralis major sits under the breast in the Muscular system.
+
+### Body layers (skin to bone)
+
+`layers.html` opens the explorer on the layers panel. A depth slider peels 14 layers from the outside in, and each layer has its own toggle.
+
+1. Skin · 2. Superficial veins · 3. Investing fascia · 4. Superficial muscles · 5. Second muscle group · 6. Intermediate muscles · 7. Deep muscles · 8. Deepest muscles · 9. Visceral coverings · 10. Anterior organs · 11. Deep organs · 12. Deep nerves and vessels · 13. Capsules and ligaments · 14. Bones and cartilage
+
+`layers.js` assigns each mesh to a layer by system and label (`layerOf`), following the reference list "Anatomical Structures Reordered by Layers". Structures the list does not name are placed by depth, so new structures land in a layer by name.
+
+### Explode mode and selection tab
+
+- **Modes:** Assemble anatomy keeps the body together. Explode anatomy pulls bones, muscles, brain and nerves, arteries, veins, organs and airway, and lymphatics into seven columns on a dark background.
+- **Regions:** Whole body, Torso and pelvis, Head and neck, Upper extremity, Lower extremity. Each column button opens that system alone, with a back button.
+- **Selection tab:** clicking a structure opens a tab with a Surrounding anatomy slider (100% filled to 0% only the selection), Center selected structure, Show selected structure only (30% visible), and Hide selected structure. Hidden structures can be restored with Undo in the Dissect section.
+
+### Added after the anatomy review (`anatomy-extras.js`)
+
+- **Deep fasciae (Investing fascia):** Fascia lata, Crural fascia, Brachial fascia, Antebrachial fascia, Deep cervical fascia (investing layer), Pretracheal fascia, Prevertebral fascia, Carotid sheath, Transversalis fascia, Rectus sheath (anterior and posterior laminae). Each is a see-through sleeve fitted to the muscles it wraps. Click picks the muscle behind a sleeve, and Alt-click picks the sleeve.
+- **Muscles:** Psoas major, Iliacus, Quadratus lumborum, Multifidus, Transversus thoracis (Deep muscles). Pubococcygeus and Iliococcygeus (Deepest muscles), which join the existing Puborectalis as the levator ani.
+- **Vessels:** Common, External and Internal iliac arteries and veins, Popliteal artery and vein, Great and Small saphenous veins (Superficial veins), Thoracic duct and Cisterna chyli.
+- **Ligaments and menisci (Capsules and ligaments):** Medial and Lateral collateral ligaments, Anterior and Posterior cruciate ligaments, Medial and Lateral menisci, Anterior and Posterior longitudinal ligaments, Ligamentum flavum, Glenoid labrum, Superior, Middle and Inferior glenohumeral ligaments, Iliofemoral ligament (lateral and medial bands).
+- **Organs:** Thymus (Deep organs).
+- **Already in the model:** Internal oblique, Transversus abdominis, intercostals, rhomboids, Levator scapulae, Erector spinae, Hepatic portal vein, Superior mesenteric and Splenic veins, Celiac trunk, SMA, IMA, Thyroid and parathyroid glands. Not added: rotatores, intertransversarii and the dorsal venous networks.
+- **Iliac vessels:** the model's femoral vessels already run from the aortic end through the pelvis, so the iliac arteries and veins are drawn over that course and the Femoral artery and vein keep the thigh.
+
 ## Modelling notes
 
 - Organ sizes run about 60–80% of textbook measurements so neighbouring structures fit without overlap.
 - Vessels that join major trunks (renal, testicular, gut arteries) belong to Circulatory so connections stay intact when systems are hidden.
 - Translucent walls (kidney cortex, stomach, bladder, prostate, scrotum) expose internal structure; subsurface effects are approximated with sheen and clearcoat.
 - Fine surface textures (gastric pits, filiform papillae, skin micro-rugae) are omitted because textures don't survive OBJ export.
-- Reproductive system is male only; penis shown flaccid.
+- A small disclaimer under the page lede links to `known-limitations.html`, which lists the areas that are approximate, thin or missing.
+- Reproductive system has male and female variants, switched with the Sex control; penis shown flaccid.
+- The female body mesh (`uploads/Female_Muscular_BaseMesh`) is not in the repository. Without it the generic body surface stays on, minus the male genitalia, and the female structures still show.
+- The menstrual cycle slider (day 1 to 28) changes endometrial thickness, the dominant follicle on the right ovary, the released oocyte on day 14 and the corpus luteum in the luteal phase.
