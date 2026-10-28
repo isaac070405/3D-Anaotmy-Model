@@ -3,73 +3,97 @@
 const LAYERS = [
   { name: 'Skin', note: 'Epidermis, dermis and the fat layer beneath.', color: '#e7c3a5' },
   { name: 'Superficial veins', note: 'Veins in the subcutaneous fat: external jugular, facial, forearm veins.', color: '#4a6fa5' },
-  { name: 'Investing fascia', note: 'Deep fascia and aponeuroses that wrap the muscles.', color: '#e6dccb' },
+  { name: 'Investing fascia', note: 'Deep fascia, aponeuroses, spermatic fasciae, Buck fascia, iliotibial tract, flexor retinaculum.', color: '#e6dccb' },
   { name: 'Superficial muscles', note: 'Muscles just under the fascia: trapezius, deltoid, pectoralis major, gluteus maximus.', color: '#b9473b' },
-  { name: 'Second muscle group', note: 'Muscles under the superficial group: rhomboids, serratus anterior, rectus femoris, soleus.', color: '#a63d33' },
-  { name: 'Intermediate muscles', note: 'Mid-depth muscles: erector spinae, brachialis, adductors, gluteus minimus.', color: '#933529' },
-  { name: 'Deep muscles', note: 'Muscles next to bone: supraspinatus, subscapularis, piriformis, tibialis posterior.', color: '#7f2d23' },
-  { name: 'Deepest muscles', note: 'Innermost muscles: diaphragm, intercostals, transversus abdominis, pharyngeal and laryngeal muscles.', color: '#6b251d' },
-  { name: 'Visceral coverings', note: 'Serous membranes and sacs: pleura, pericardium, peritoneum, meninges, tunica vaginalis.', color: '#d9d2a3' },
-  { name: 'Anterior organs', note: 'Heart, lungs, stomach, liver, intestines, bladder, thyroid, eyes, ears and reproductive organs.', color: '#d79a8b' },
-  { name: 'Deep organs', note: 'Kidneys, ureters, pancreas, duodenum, oesophagus, brain and spinal cord.', color: '#a9646a' },
-  { name: 'Deep nerves and vessels', note: 'Arteries, deep veins, nerves, plexuses and ganglia.', color: '#d9a441' },
-  { name: 'Capsules and ligaments', note: 'Joint capsules, ligaments and intervertebral discs.', color: '#c9c2a6' },
-  { name: 'Bones and cartilage', note: 'Skeleton, teeth, costal, articular and laryngeal cartilage.', color: '#e6d8b8' },
+  { name: 'Second muscle group', note: 'Triceps brachii, gluteus medius, vastus lateralis and medialis, adductor longus, soleus, flexor digitorum superficialis.', color: '#a63d33' },
+  { name: 'Intermediate muscles', note: 'Brachialis, serratus anterior, infraspinatus, teres major, piriformis, vastus intermedius, semimembranosus.', color: '#933529' },
+  { name: 'Deep muscles', note: 'Supraspinatus, subscapularis, gluteus minimus, adductor magnus, tibialis posterior, thenar muscles, puborectalis.', color: '#7f2d23' },
+  { name: 'Deepest muscles', note: 'Diaphragm, supinator, pronator quadratus, sphincters, trachealis, detrusor, and the wall muscle of stomach and oesophagus.', color: '#6b251d' },
+  { name: 'Visceral coverings', note: 'Dura mater, pericardium, pleura, omenta and mesenteries, serosae, renal and prostate capsules, testicular tunics.', color: '#d9d2a3' },
+  { name: 'Anterior organs', note: 'Heart chambers and valves, larynx, liver, gallbladder, stomach, transverse colon, caecum, bladder, testis, penis.', color: '#d79a8b' },
+  { name: 'Deep organs', note: 'Brain, mouth and pharynx, trachea and lungs, oesophagus, pancreas, spleen, bowel, kidneys, prostate, urethra.', color: '#a9646a' },
+  { name: 'Deep nerves and vessels', note: 'Cranial and spinal nerves, spinal cord, plexuses, great arteries, cerebral arteries, sinuses and deep veins.', color: '#d9a441' },
+  { name: 'Capsules and ligaments', note: 'Cranial sutures, acromioclavicular joint, intervertebral discs, and skeletal, laryngeal and visceral ligaments.', color: '#c9c2a6' },
+  { name: 'Bones and cartilage', note: 'Skull, spine, ribs, limb bones, teeth, costal cartilage and airway cartilage rings.', color: '#e6d8b8' },
 ];
 
+// Layer rules follow "Anatomical Structures Reordered by Layers" (the reference list). Indices are 0-based: 0 Skin ... 13 Bones and cartilage.
+// Muscles named in the list sit in the layer it gives. Unlisted muscles fall back to a depth guess further down.
 const MUSCLE = [
-  [2, /fascia|aponeurosis|iliotibial|linea alba|retinaculum|inguinal ligament/i],
+  [2, /\bfascia\b|^(Palmar|Bicipital) aponeurosis|iliotibial|linea alba|retinaculum/i],
+  [12, /pes anserinus|ligament/i],
+  [3, /^(Pectoralis major|Latissimus dorsi|Trapezius|Sternocleidomastoid|Rectus abdominis|External oblique|Deltoid|Biceps brachii|Brachioradialis|Pronator teres|Flexor carpi radialis|Palmaris longus|Flexor carpi ulnaris|Extensor carpi radialis longus|Extensor digitorum \(forearm\)|Gluteus maximus|Tensor fasciae latae|Sartorius|Rectus femoris|Gracilis|Gastrocnemius|Tibialis anterior|Extensor digitorum longus|Ischiocavernosus|Bulbospongiosus)/],
+  [4, /^(Flexor digitorum superficialis|Extensor carpi radialis brevis|Triceps brachii|Gluteus medius|Vastus lateralis|Vastus medialis|Pectineus|Adductor longus|Biceps femoris, long|Semitendinosus|Plantaris|Soleus|Calcaneal|Fibularis longus)/],
+  [5, /^(Brachialis|Coracobrachialis|Serratus anterior|Infraspinatus|Teres major|Vastus intermedius|Quadriceps tendon|Adductor brevis|Semimembranosus|Biceps femoris, short|Piriformis|Extensor hallucis longus|Fibularis brevis|Fibularis tertius|Cremaster)/],
+  [6, /^(Supraspinatus|Subscapularis|Flexor digitorum profundus|Flexor pollicis longus|Abductor pollicis longus|Thenar|Gluteus minimus|Obturator internus|Gemellus|Quadratus femoris|Adductor magnus|Popliteus|Tibialis posterior|Flexor digitorum longus|Flexor hallucis longus|Extensor digitorum brevis|Puborectalis)/],
+  [7, /^(Supinator|Pronator quadratus|Diaphragm)/],
+  // not in the list: placed by depth
+  [3, /^(Platysma|Orbicularis|Zygomaticus|Depressor anguli|Procerus|Masseter|Temporalis|Buccinator)/],
+  [4, /^(Rhomboid|Levator scapulae|Splenius|Internal oblique|Teres minor|Pectoralis minor|Omohyoid|Digastric|Sternohyoid)/],
+  [6, /^(Subclavius|Obliquus capitis|Rectus capitis|Genioglossus|Hyoglossus|Styloglossus|Stylohyoid|Levator palpebrae|(Superior|Inferior|Lateral|Medial) (rectus|oblique)|Geniohyoid)/],
   [7, /^(Superior pharyngeal|Middle pharyngeal|Inferior pharyngeal|Palatopharyngeus|Levator veli|Cricothyroid|Lateral cricoarytenoid|Posterior cricoarytenoid|Thyroarytenoid|Vocalis|Oblique arytenoid|Transverse arytenoid|Internal intercostal|External intercostal|Transversus abdominis)/],
-  [6, /^(Piriformis|Obturator|Gemellus|Quadratus femoris|Tibialis posterior|Pronator quadratus|Subclavius|Obliquus capitis|Rectus capitis|Genioglossus|Hyoglossus|Styloglossus|Stylohyoid|Levator palpebrae|Superior (rectus|oblique)|Inferior (rectus|oblique)|Lateral rectus|Medial rectus|Popliteus|Subscapularis|Supraspinatus|Flexor hallucis longus|Flexor digitorum longus|Geniohyoid)/],
-  [3, /^(Trapezius|Latissimus|Deltoid|Pectoralis major|External oblique|Sternocleidomastoid|Platysma|Gluteus maximus|Rectus abdominis|Orbicularis|Zygomaticus|Depressor anguli|Procerus|Masseter|Temporalis|Gastrocnemius|Tensor fasciae|Sartorius|Gracilis|Semitendinosus|Biceps femoris, long|Brachioradialis|Biceps brachii|Triceps brachii, (lateral|long)|Flexor carpi|Palmaris longus|Extensor digitorum \(forearm\)|Extensor carpi radialis|Thenar|Calcaneal|Buccinator)/],
-  [4, /^(Rhomboid|Serratus anterior|Levator scapulae|Splenius|Internal oblique|Gluteus medius|Rectus femoris|Vastus lateralis|Vastus medialis|Biceps femoris, short|Semimembranosus|Soleus|Extensor digitorum longus|Fibularis|Flexor digitorum superficialis|Pronator teres|Teres|Infraspinatus|Adductor longus|Pectoralis minor|Omohyoid|Digastric|Quadriceps)/],
 ];
-const SUPERFICIAL_VEIN = /^(External jugular|Median (antebrachial|cubital)|Cephalic|Basilic|Facial vein|Superficial temporal vein|Supraorbital vein|Supratrochlear vein|Retromandibular)/;
-const VESSEL = /artery|vein|nerve|vessel|plexus|lymphatic/i;
-const PERIPHERAL = /nerve|plexus|ganglion|sympathetic|vagus|trunk|cauda equina|ansa|filum|root|ramus|rami/i;
+const SUPERFICIAL_VEIN = /^(External jugular|Median (antebrachial|cubital)|Cephalic|Basilic|Dorsal venous network|Facial vein|Superficial temporal vein|Supraorbital vein|Supratrochlear vein|Retromandibular)/;
+const VESSEL = /artery|arteries|vein|veins|vessel|plexus|lymphatic|aorta|aortic arch|trunk|vena cava|sinus/i;
+const NERVE = /nerve|plexus|ganglion|sympathetic|vagus|trunk|cauda equina|ansa|filum|root|ramus|rami|spinal cord|conus medullaris/i;
 
-// first line of the label with the side and tendon suffix removed, so "Biceps brachii, tendon of insertion (left)" sorts with the muscle
 const stem = l => l.replace(/\s*\((right|left)\)/g, '');
 
-function layerOf(o, heart) {
+function layerOf(o) {
   const sys = o.userData.sys, label = stem(o.userData.label || o.name || '');
   switch (sys) {
     case 'skin': case 'fat': return 0;
     case 'muscular': { for (const [i, re] of MUSCLE) if (re.test(label)) return i; return 5; }
-    case 'skeletal': return /ligament|capsule|joint|disc/i.test(label) ? 12 : 13;
+    case 'skeletal': return /suture|joint|disc|ligament|capsule/i.test(label) ? 12 : 13;
     case 'circulatory':
-      if (heart(o)) return 9;
-      if (/sinus|cerebral|communicating|meningeal/i.test(label)) return 10;
-      return SUPERFICIAL_VEIN.test(label) ? 1 : 11;
+      if (/^(Fibrous pericardium|Epicardial fat)/.test(label)) return 8;
+      if (/Papillary muscle|Musculi pectinati|Trabeculae carneae/.test(label)) return 7;
+      if (/^Ligamentum arteriosum/.test(label)) return 12;
+      if (SUPERFICIAL_VEIN.test(label)) return 1;
+      return VESSEL.test(label) ? 11 : 9; // heart chambers, valves and the conduction system stay anterior organs
     case 'respiratory':
-      if (/^Diaphragm|Caval opening|Aortic hiatus/.test(label)) return 7;
+      if (/^Diaphragm|Caval opening|Aortic hiatus|Trachealis|smooth muscle/i.test(label)) return 7;
       if (/^Pleura/.test(label)) return 8;
-      if (/^(Thyrohyoid ligament|Cricothyroid ligament|Pulmonary ligament|.*arcuate ligament)/.test(label)) return 12;
-      if (/cartilage|^Epiglottis/i.test(label)) return 13;
-      return 9;
+      if (/^(Thyrohyoid ligament|Cricothyroid ligament|Pulmonary ligament)|arcuate ligament/.test(label)) return 12;
+      if (/^(Thyroid cartilage|Cricoid|Arytenoid|Epiglottis|Vocal fold|Vestibular fold)/.test(label)) return 9;
+      if (/cartilage/i.test(label)) return 13;
+      return 10; // trachea, bronchi, lungs, alveoli
     case 'digestive':
-      if (/serosa|peritoneum|tunica adventitia/i.test(label)) return 8;
-      return /pancrea|duoden|ascending colon|descending colon|rectum|anal canal|esophag|oesophag|pharynx|Z-line/i.test(label) ? 10 : 9;
-    case 'urinary': return /bladder|trigone|detrusor|urethr/i.test(label) && !/ureteric/i.test(label) ? 9 : 10;
-    case 'reproductive':
-      if (/Retromammary|pectoral fascia/i.test(label)) return 2;
-      if (/Tunica vaginalis|spermatic fascia|Dartos/i.test(label)) return 8;
+      if (/gastrosplenic|omentum|mesenter|taenia|omental appendic|serosa|tunica adventitia|peritone/i.test(label)) return 8;
+      if (/Phrenicocolic/i.test(label)) return 12;
+      if (VESSEL.test(label)) return 11;
+      if (/muscle layer|sphincter|Suspensory muscle/i.test(label)) return 7;
+      if (/bile duct|biliary|cystic|hepatic duct/i.test(label)) return 10;
+      return /Liver|Gallbladder|Stomach|Gastric|curvature|Angular incisure|Cardiac notch|Transverse colon|Cecum|Caecum|Vermiform|Appendix/i.test(label) ? 9 : 10;
+    case 'urinary':
+      if (/Renal capsule|Renal sinus fat/.test(label)) return 8;
       if (/ligament/i.test(label)) return 12;
-      return VESSEL.test(label) ? 11 : 9;
+      if (VESSEL.test(label)) return 11;
+      if (/Detrusor|sphincter/i.test(label)) return 7;
+      return /^(Urinary bladder|Bladder mucosa|Trigone)/.test(label) ? 9 : 10;
+    case 'reproductive':
+      if (/^Scrotum|Penile skin|raphe/i.test(label)) return 0;
+      if (/Dartos|spermatic fascia|Buck|Rectoprostatic|Retromammary|pectoral fascia/i.test(label)) return 2;
+      if (/Ischiocavernosus|Bulbospongiosus/i.test(label)) return 3;
+      if (/Cremaster/i.test(label)) return 5;
+      if (/Anterior fibromuscular stroma/i.test(label)) return 7;
+      if (/Perineal membrane|capsule|Tunica vaginalis|Tunica albuginea|tunica albuginea|Septula|Mediastinum testis/.test(label) && !/Seminal vesicle/.test(label)) return 8;
+      if (/ligament/i.test(label)) return 12;
+      if (VESSEL.test(label) || /nerve/i.test(label)) return 11;
+      return /prostat|Seminal vesicle|Ductus deferens|Ampulla|Ejaculatory|Bulbourethral|urethr|colliculus|utricle/i.test(label) ? 10 : 9;
     case 'senses': case 'endocrine': return 9;
     case 'nervous':
       if (/Dura mater|meninges/i.test(label)) return 8;
-      return PERIPHERAL.test(label) ? 11 : 10;
+      if (/Choroid plexus/.test(label)) return 10;
+      return NERVE.test(label) ? 11 : 10;
     default: return -1;
   }
 }
 
 function init() {
   const A = window.__anat, G = A.G, $ = id => document.getElementById(id);
-  const hr = window.__heartRange || [0, 0], heartSet = new Set(G.circulatory.children.slice(hr[0], hr[1]));
-  const heart = o => { for (let p = o; p && p !== G.circulatory; p = p.parent) if (heartSet.has(p)) return true; return /pulmonary_(artery|vein)/.test(o.name) && !/intrapulmonary/i.test(o.userData.label || ''); };
   const meshes = LAYERS.map(() => []), base = new Map();
-  A.model.traverse(o => { if (!o.isMesh || !o.userData.sys) return; const k = layerOf(o, heart); if (k < 0) return; o.userData.layer = k; meshes[k].push(o); base.set(o, o.visible); });
+  A.model.traverse(o => { if (!o.isMesh || !o.userData.sys) return; const k = layerOf(o); if (k < 0) return; o.userData.layer = k; meshes[k].push(o); base.set(o, o.visible); });
   const on = LAYERS.map(() => true); let touched = null;
 
   const apply = () => { meshes.forEach((ms, k) => ms.forEach(o => { o.visible = base.get(o) && on[k]; })); };
