@@ -1,13 +1,37 @@
 # Structures, Tissues and Organs in the 3D Anatomical Model, by Body System
 
-Source: `Anatomical Model Contents.md`. Total listed parts: 675 across 9 systems.
+Source: the parts lists the model shows in its sidebar (`anatomy-part1.js`, `anatomy-part2.js`, `anatomy-extras.js`), checked against the structures actually built in the model. Total: 971 parts across 13 systems.
 
+Structures built in the model but missing from a sidebar list are shown in a separate "Also modelled" line. Left and right copies count once. Vertebrae C1 to L5, ribs 1 to 12 and the intervertebral discs are individual meshes that appear in the lists as ranges.
+
+| System | Parts |
+|---|---|
+| Skin | 8 |
+| Subcutaneous fat | 1 |
+| Skeletal | 115 |
+| Muscular | 156 |
+| Circulatory | 186 |
+| Respiratory | 64 |
+| Digestive | 121 |
+| Urinary | 29 |
+| Reproductive (male) | 67 |
+| Reproductive (female) and breast | 35 |
+| Eye and ear | 22 |
+| Endocrine (thyroid, parathyroid, thymus) | 7 |
+| Nervous | 160 |
 
 ## Skin
 
-- Head, Torso, Arms and hands, Legs and feet
+- Head, Torso, Arms and hands, Legs and feet, Genitals
+- **Also modelled, not in the sidebar list:** Ear, Nose, Neck
 
-_4 listed parts._
+_5 listed parts plus 3 more._
+
+## Subcutaneous fat
+
+- Subcutaneous fat
+
+_1 listed parts._
 
 ## Skeletal
 
