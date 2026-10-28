@@ -1,4 +1,5 @@
 import { stage, THREE, V, model, SYS, G, M, mat, reg, xf, sph, box, Y, seg, tube, SK, zc, skPt, MS, mm, belly, SU, DP, __nextMcount } from './anatomy-part1.js';
+import './anatomy-extras.js';
 
 
 // ───────── URINARY ─────────
@@ -1460,7 +1461,7 @@ stage.addEventListener('pointermove', e => {
   ray.setFromCamera(pt, stage._camera);
   const meshes = []; model.traverse(o => { if (o.isMesh && o.userData.label && vis(o)) meshes.push(o); });
   const hits = ray.intersectObjects(meshes, false);
-  const h = hits.find(x => x.object.userData.sys !== 'skin') || hits[0];
+  const h = hits.find(x => x.object.userData.sys !== 'skin' && !x.object.userData.passive) || hits.find(x => x.object.userData.sys !== 'skin') || hits[0];
   if (!h) { tip.style.display = 'none'; return; }
   tip.textContent = h.object.userData.label; tip.style.display = 'block';
   tip.style.left = e.clientX + 14 + 'px'; tip.style.top = e.clientY + 14 + 'px';
@@ -1658,7 +1659,7 @@ stage.addEventListener('pointerup', e => {
   const rc = stage._renderer.domElement.getBoundingClientRect();
   pt.set(((e.clientX - rc.left) / rc.width) * 2 - 1, -((e.clientY - rc.top) / rc.height) * 2 + 1); ray.setFromCamera(pt, stage._camera);
   const ms = []; model.traverse(o => { if (o.isMesh && o.userData.label && vis(o) && o.userData.sys !== 'skin') ms.push(o); });
-  const h = ray.intersectObjects(ms, false)[0]; if (!h) return;
+  const hs = ray.intersectObjects(ms, false), h = (e.altKey ? hs[0] : hs.find(x => !x.object.userData.passive)) || hs[0]; if (!h) return; // fascial sleeves are see-through: pick the structure behind them (Alt picks the sleeve)
   if (window.__select) { window.__select(h.object); tip.style.display = 'none'; return; }
   const lab = h.object.userData.label, grp = ms.filter(m => m.userData.label === lab);
   grp.forEach(m => { m.visible = false; }); removed.push(grp); tip.style.display = 'none'; dcount(); requestSlice();

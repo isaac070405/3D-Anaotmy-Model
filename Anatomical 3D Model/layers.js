@@ -20,20 +20,20 @@ const LAYERS = [
 // Layer rules follow "Anatomical Structures Reordered by Layers" (the reference list). Indices are 0-based: 0 Skin ... 13 Bones and cartilage.
 // Muscles named in the list sit in the layer it gives. Unlisted muscles fall back to a depth guess further down.
 const MUSCLE = [
-  [2, /\bfascia\b|^(Palmar|Bicipital) aponeurosis|iliotibial|linea alba|retinaculum/i],
+  [2, /\bfascia\b|^(Rectus|Carotid) sheath|^(Palmar|Bicipital) aponeurosis|iliotibial|linea alba|retinaculum/i],
   [12, /pes anserinus|ligament/i],
   [3, /^(Pectoralis major|Latissimus dorsi|Trapezius|Sternocleidomastoid|Rectus abdominis|External oblique|Deltoid|Biceps brachii|Brachioradialis|Pronator teres|Flexor carpi radialis|Palmaris longus|Flexor carpi ulnaris|Extensor carpi radialis longus|Extensor digitorum \(forearm\)|Gluteus maximus|Tensor fasciae latae|Sartorius|Rectus femoris|Gracilis|Gastrocnemius|Tibialis anterior|Extensor digitorum longus|Ischiocavernosus|Bulbospongiosus)/],
   [4, /^(Flexor digitorum superficialis|Extensor carpi radialis brevis|Triceps brachii|Gluteus medius|Vastus lateralis|Vastus medialis|Pectineus|Adductor longus|Biceps femoris, long|Semitendinosus|Plantaris|Soleus|Calcaneal|Fibularis longus)/],
   [5, /^(Brachialis|Coracobrachialis|Serratus anterior|Infraspinatus|Teres major|Vastus intermedius|Quadriceps tendon|Adductor brevis|Semimembranosus|Biceps femoris, short|Piriformis|Extensor hallucis longus|Fibularis brevis|Fibularis tertius|Cremaster)/],
-  [6, /^(Supraspinatus|Subscapularis|Flexor digitorum profundus|Flexor pollicis longus|Abductor pollicis longus|Thenar|Gluteus minimus|Obturator internus|Gemellus|Quadratus femoris|Adductor magnus|Popliteus|Tibialis posterior|Flexor digitorum longus|Flexor hallucis longus|Extensor digitorum brevis|Puborectalis)/],
-  [7, /^(Supinator|Pronator quadratus|Diaphragm)/],
+  [6, /^(Psoas major|Iliacus|Quadratus lumborum|Multifidus|Transversus thoracis|Supraspinatus|Subscapularis|Flexor digitorum profundus|Flexor pollicis longus|Abductor pollicis longus|Thenar|Gluteus minimus|Obturator internus|Gemellus|Quadratus femoris|Adductor magnus|Popliteus|Tibialis posterior|Flexor digitorum longus|Flexor hallucis longus|Extensor digitorum brevis|Puborectalis)/],
+  [7, /^(Supinator|Pronator quadratus|Diaphragm|Pubococcygeus|Iliococcygeus)/],
   // not in the list: placed by depth
   [3, /^(Platysma|Orbicularis|Zygomaticus|Depressor anguli|Procerus|Masseter|Temporalis|Buccinator)/],
   [4, /^(Rhomboid|Levator scapulae|Splenius|Internal oblique|Teres minor|Pectoralis minor|Omohyoid|Digastric|Sternohyoid)/],
   [6, /^(Subclavius|Obliquus capitis|Rectus capitis|Genioglossus|Hyoglossus|Styloglossus|Stylohyoid|Levator palpebrae|(Superior|Inferior|Lateral|Medial) (rectus|oblique)|Geniohyoid)/],
   [7, /^(Superior pharyngeal|Middle pharyngeal|Inferior pharyngeal|Palatopharyngeus|Levator veli|Cricothyroid|Lateral cricoarytenoid|Posterior cricoarytenoid|Thyroarytenoid|Vocalis|Oblique arytenoid|Transverse arytenoid|Internal intercostal|External intercostal|Transversus abdominis)/],
 ];
-const SUPERFICIAL_VEIN = /^(External jugular|Median (antebrachial|cubital)|Cephalic|Basilic|Dorsal venous network|Facial vein|Superficial temporal vein|Supraorbital vein|Supratrochlear vein|Retromandibular)/;
+const SUPERFICIAL_VEIN = /^(Great saphenous|Small saphenous|External jugular|Median (antebrachial|cubital)|Cephalic|Basilic|Dorsal venous network|Facial vein|Superficial temporal vein|Supraorbital vein|Supratrochlear vein|Retromandibular)/;
 const VESSEL = /artery|arteries|vein|veins|vessel|plexus|lymphatic|aorta|aortic arch|trunk|vena cava|sinus/i;
 const NERVE = /nerve|plexus|ganglion|sympathetic|vagus|trunk|cauda equina|ansa|filum|root|ramus|rami|spinal cord|conus medullaris/i;
 
@@ -44,11 +44,12 @@ function layerOf(o) {
   switch (sys) {
     case 'skin': case 'fat': return 0;
     case 'muscular': { for (const [i, re] of MUSCLE) if (re.test(label)) return i; return 5; }
-    case 'skeletal': return /suture|joint|disc|ligament|capsule/i.test(label) ? 12 : 13;
+    case 'skeletal': return /suture|joint|disc|ligament|capsule|menisc|labrum/i.test(label) ? 12 : 13;
     case 'circulatory':
       if (/^(Fibrous pericardium|Epicardial fat)/.test(label)) return 8;
       if (/Papillary muscle|Musculi pectinati|Trabeculae carneae/.test(label)) return 7;
       if (/^Ligamentum arteriosum/.test(label)) return 12;
+      if (/^(Thoracic duct|Cisterna chyli)/.test(label)) return 11;
       if (SUPERFICIAL_VEIN.test(label)) return 1;
       return VESSEL.test(label) ? 11 : 9; // heart chambers, valves and the conduction system stay anterior organs
     case 'respiratory':
@@ -81,7 +82,8 @@ function layerOf(o) {
       if (/ligament/i.test(label)) return 12;
       if (VESSEL.test(label) || /nerve/i.test(label)) return 11;
       return /prostat|Seminal vesicle|Ductus deferens|Ampulla|Ejaculatory|Bulbourethral|urethr|colliculus|utricle/i.test(label) ? 10 : 9;
-    case 'senses': case 'endocrine': return 9;
+    case 'endocrine': return /^Thymus/.test(label) ? 10 : 9;
+    case 'senses': return 9;
     case 'nervous':
       if (/Dura mater|meninges/i.test(label)) return 8;
       if (/Choroid plexus/.test(label)) return 10;

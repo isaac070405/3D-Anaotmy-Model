@@ -18,7 +18,7 @@ const REGIONS = [
   { k: 'arm', name: 'Upper extremity', test: c => Math.abs(c.x) >= 0.17 && c.y > 0.6 && c.y < 1.5 },
   { k: 'leg', name: 'Lower extremity', test: c => c.y <= 0.74 },
 ];
-const LYMPH = /lymph|node|spleen|thymus|tonsil/i, VEINISH = /vein|venous|sinus|plexus|vena cava/i;
+const LYMPH = /lymph|node|spleen|thymus|tonsil|thoracic duct|cisterna/i, VEINISH = /vein|venous|sinus|plexus|vena cava/i;
 
 function init() {
   const A = window.__anat, THREE = A.THREE, G = A.G, model = A.model, stage = document.querySelector('three-d-stage'), $ = id => document.getElementById(id);
