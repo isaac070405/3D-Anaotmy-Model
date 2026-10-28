@@ -35,7 +35,16 @@
   h1{font-family:var(--font-heading);font-weight:400;font-size:32px;line-height:1.05;margin:6px 0 8px}
   .lede{font-size:13px;line-height:1.5;margin:0 0 14px;text-align:justify;hyphens:auto}
   h2{font-family:var(--font-heading);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700);margin:0 0 6px}
+  .disc{font-size:11px;line-height:1.4;color:var(--color-neutral-700);margin:-4px 0 10px}
+  .disc a{color:var(--color-accent-600);text-decoration:underline}
   .sec{border-top:1px solid var(--color-divider);padding:12px 0}
+  #layerssec.hl{outline:2px solid var(--color-accent-200);outline-offset:4px;border-radius:6px}
+  #lycur{font-size:12px;margin:6px 0 8px;color:var(--color-neutral-700)}
+  .ly{display:grid;grid-template-columns:18px 12px 1fr auto;gap:8px;align-items:start;padding:5px 0;border-top:1px solid var(--color-divider);cursor:pointer;font-size:13px}
+  .ly .lyn{font-size:11px;color:var(--color-neutral-700);padding-top:2px}
+  .ly .sw{width:12px;height:12px;border-radius:50%;margin-top:3px;border:1px solid rgba(0,0,0,.15)}
+  .ly .lyt small{display:block;font-size:11px;line-height:1.35;color:var(--color-neutral-700);margin-top:1px}
+  .ly.off{opacity:.55}
   .sys{display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:2px;cursor:pointer}
   .sys:hover{background:var(--color-accent-100)}
   .sys.sel{background:var(--color-accent-200)}
@@ -139,7 +148,9 @@
 <aside class="panel" data-comment-anchor="e05a1aae89-aside">
   <div class="kicker">Plate II · Systems of the body</div>
   <h1>Human anatomy</h1>
-  <p class="lede">A simplified model in anatomical position. Search for a part, peel the layers from skin to bone, click a structure to lift it away, and cut through the body with the slice view.</p>
+  <p class="lede">A simplified model in anatomical position. Search for a part, peel the layers from skin to bone, explode the body into systems, click a structure to isolate it, and cut through the body with the slice view.</p>
+
+  <p class="disc">This model does not exactly reflect the real body arrangement; <a href="known-limitations.html" target="_blank" rel="noopener">a few positional or displacement errors</a> may exist.</p>
 
   <div class="sec">
     <h2>Body</h2>
@@ -198,7 +209,12 @@
 
   <div class="sec">
     <h2>Renal and reproductive</h2>
-    <div class="vb"><button class="b" data-v="kidneys">Kidneys</button><button class="b" data-v="kidneysback">Kidneys from behind</button><button class="b" data-v="pelvis">Bladder and pelvis</button><button class="b" data-v="repro">Reproductive organs</button><button class="b" data-v="reproside">Reproductive pelvis from the side</button><button class="b" data-v="reset">Reset</button></div>
+    <div class="vb"><button class="b" data-v="kidneys">Kidneys</button><button class="b" data-v="kidneysback">Kidneys from behind</button><button class="b" data-v="pelvis">Bladder and pelvis</button><button class="b" data-v="repro">Reproductive organs</button><button class="b" data-v="reproside">Reproductive pelvis from the side</button><button class="b" data-v="cycle">Ovaries and uterus close-up (female)</button><button class="b" data-v="breast">Breast (female)</button><button class="b" data-v="breastside">Breast from the side (female)</button><button class="b" data-v="reset">Reset</button></div>
+    <div id="cyclebox" style="display:none">
+      <label for="cycleday" style="font-size:12px">Menstrual cycle, day <b id="cycledayn">1</b> of 28: <span id="cyclephase">Menstruation</span></label>
+      <input type="range" id="cycleday" min="1" max="28" step="1" value="1" aria-label="Menstrual cycle day">
+      <p id="cyclenote" style="font-size:12px;line-height:1.45;margin:6px 0 0"></p>
+    </div>
   </div>
 
   <div class="sec">
@@ -218,6 +234,15 @@
     <div class="vb" id="p-present" style="margin-bottom:0"><button class="b" data-v="off">Explore</button><button class="b" data-v="on">Turntable</button></div>
   </div>
 
+  <div class="sec" id="layerssec">
+    <h2>Body layers, skin to bone</h2>
+    <input type="range" id="lyslider" min="0" max="13" step="1" value="0" aria-label="Peel body layers from skin to bone">
+    <div class="tick"><span>Skin</span><span>Muscles</span><span>Organs</span><span>Bone</span></div>
+    <p id="lycur">Outermost visible: Skin</p>
+    <div class="vb"><button class="b" id="lyall">Show all layers</button><button class="b" id="lyreset">Reset</button></div>
+    <div id="lylist"></div>
+  </div>
+
   <div class="sec">
     <h2>Peel layers</h2>
     <input type="range" id="peel" min="0" max="3" step="1" value="0" aria-label="Peel layers from skin to bone">
@@ -226,7 +251,7 @@
 
   <div class="sec">
     <h2>Dissect</h2>
-    <div class="dz">Click any structure in the model to lift it away.</div>
+    <div class="dz">Click any structure to select it. Its tab can hide it, and Undo brings hidden structures back.</div>
     <div id="dcount">Nothing removed</div>
     <div class="btns"><button class="b" id="undo">Undo</button><button class="b" id="restore">Put all back</button></div>
   </div>
@@ -262,5 +287,7 @@
 <script src="three-d-stage.js"></script>
 <script type="module" src="anatomy-part1.js"></script>
 <script type="module" src="anatomy-part2.js"></script>
+<script type="module" src="layers.js"></script>
+<script type="module" src="explode.js"></script>
 </body>
 </html>
