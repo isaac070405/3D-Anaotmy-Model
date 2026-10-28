@@ -1094,7 +1094,7 @@ const FATG = { male: new THREE.Group(), female: new THREE.Group() }; FATG.male.n
     stroma.computeVertexNormals();
     F('breast_fibrous_tissue_' + sd, new THREE.Mesh(stroma, FM.fibrous), 'Fibrous connective tissue (breast, ' + sd + ')');
     F('retromammary_space_' + sd, new THREE.Mesh(new THREE.CircleGeometry(0.044, 36), FM.fibrous), 'Retromammary space and pectoral fascia (' + sd + ')').position.set(center.x, center.y, center.z - 0.036);
-    for (let i = 0; i < 8; i++) { const a = (i / 8) * PI2 + 0.3; F('montgomery_gland_' + sd + '_' + i, new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), FM.gland), "Montgomery's glands (" + sd + ')').position.set(center.x + 0.0105 * Math.cos(a), center.y - 0.0085 + 0.0105 * Math.sin(a), center.z + 0.0362); }
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * PI2 + 0.3, mg = F('montgomery_gland_' + sd + '_' + i, new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), FM.gland), "Montgomery's glands (" + sd + ')'); mg.position.set(center.x + 0.0105 * Math.cos(a), center.y - 0.0085 + 0.0105 * Math.sin(a), center.z + 0.0362); mg.scale.setScalar(0.0013); }
     tubeF('internal_thoracic_branch_' + sd, [[s * 0.03, center.y + 0.05, center.z - 0.04], [s * 0.05, center.y + 0.015, center.z - 0.034], [center.x - s * 0.02, center.y - 0.004, center.z - 0.02]], 0.0013, FM.vessel, 'Internal thoracic artery branches (' + sd + ')');
     tubeF('lateral_thoracic_branch_' + sd, [[center.x + s * 0.09, center.y + 0.07, center.z - 0.05], [center.x + s * 0.052, center.y + 0.032, center.z - 0.02], [center.x + s * 0.016, center.y + 0.002, center.z + 0.004]], 0.0013, FM.vessel, 'Lateral thoracic artery branches (' + sd + ')');
     tubeF('intercostal_nerve_' + sd, [[center.x + s * 0.06, center.y - 0.03, center.z - 0.07], [center.x + s * 0.035, center.y - 0.012, center.z - 0.034], [center.x + s * 0.005, center.y - 0.006, center.z + 0.02]], 0.0011, mat.nerve, 'Intercostal nerve branches (' + sd + ')');
@@ -1648,7 +1648,7 @@ const removed = [];
 function dcount() { const n = removed.filter(r => r.some(m => !m.visible)).length; $('dcount').textContent = n ? n + ' removed · last: ' + removed[removed.length - 1][0].userData.label : 'Nothing removed'; $('undo').disabled = !removed.length; }
 $('undo').onclick = () => { const r = removed.pop(); if (r) r.forEach(m => { m.visible = true; }); dcount(); requestSlice(); };
 $('restore').onclick = () => { removed.splice(0).forEach(r => r.forEach(m => { m.visible = true; })); dcount(); requestSlice(); };
-dcount();
+dcount(); window.__removed = removed; window.__dcount = dcount;
 let down = null;
 stage.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
 stage.addEventListener('pointerup', e => {
@@ -1659,6 +1659,7 @@ stage.addEventListener('pointerup', e => {
   pt.set(((e.clientX - rc.left) / rc.width) * 2 - 1, -((e.clientY - rc.top) / rc.height) * 2 + 1); ray.setFromCamera(pt, stage._camera);
   const ms = []; model.traverse(o => { if (o.isMesh && o.userData.label && vis(o) && o.userData.sys !== 'skin') ms.push(o); });
   const h = ray.intersectObjects(ms, false)[0]; if (!h) return;
+  if (window.__select) { window.__select(h.object); tip.style.display = 'none'; return; }
   const lab = h.object.userData.label, grp = ms.filter(m => m.userData.label === lab);
   grp.forEach(m => { m.visible = false; }); removed.push(grp); tip.style.display = 'none'; dcount(); requestSlice();
 });
