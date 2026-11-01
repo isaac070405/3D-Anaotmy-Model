@@ -689,6 +689,7 @@ for (const s of [-1, 1]) { const sd = SD(s), sc = SC(s); LL.forEach(([name, labe
       if (G3['white_matter_' + sd]) add('white_matter', 'cerebral_white_matter', 'Cerebral white matter', wmat, SC(s)).renderOrder = 0;
     }
     { const m = new THREE.Mesh(G3.cerebellum, cb); m.position.set(0, C0, 0); tag(reg(NS, 'cerebellum', m, { label: 'Cerebellum' }), 'M'); }
+    window.__mniLoaded = true;
   }
 }
 window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
@@ -1780,6 +1781,32 @@ const LN = { frontal: 'Frontal lobe', parietal: 'Parietal lobe', temporal: 'Temp
 const rgb = hex => [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255], cl = (x, a, b) => Math.min(b, Math.max(a, x));
 const px = x => (x - X0) * S, py = z => (Z1 - z) * S;
 let mode = 'mri', isOpen = false, saved = null, anchors = [], level = 0.728;
+// Real template slices: assets/mni_brain_t1.bin (uint8 volume) and .json (shape, metres per voxel, centre voxel) come from scripts/mni_brain_to_glb.py.
+let VOL = null;
+if (window.__mniLoaded) { try { const meta = await (await fetch('assets/mni_brain_t1.json')).json(), buf = await (await fetch('assets/mni_brain_t1.bin')).arrayBuffer(); VOL = { ...meta, data: new Uint8Array(buf) }; } catch (er) { VOL = null; } }
+if (VOL) { $$('bxatlas').style.display = 'none'; const key = document.querySelector('#brainbox .bxkey'); if (key) key.innerHTML = '<span>MNI template T1, 1 mm slices</span><span style="margin-left:auto">Anterior up · patient\'s right on the left</span>'; }
+function updateMNI() {
+  const h = 1.5 + level * 0.213, dy = h - C0, [nx, ny, nz] = VOL.shape, [cx, cy, cz] = VOL.centre, k = VOL.k, d = VOL.data;
+  if (planes.transverse) { planes.transverse.visible = true; planes.transverse.position.y = h; }
+  const l = cz + dy / k, l0 = Math.floor(l), fl = l - l0, img = ctx.createImageData(W, H), o = img.data, inZ = l0 >= 0 && l0 + 1 < nz;
+  for (let y = 0; y < H; y++) {
+    const j = cy + (Z1 - (y + 0.5) / S) / k, j0 = Math.floor(j), fj = j - j0;
+    for (let x = 0; x < W; x++) {
+      const p = (y * W + x) * 4; let v = 0;
+      if (inZ && j0 >= 0 && j0 + 1 < ny) {
+        const i = cx - (X0 + (x + 0.5) / S) / k, i0 = Math.floor(i), fi = i - i0;
+        if (i0 >= 0 && i0 + 1 < nx) {
+          const at = (a, b) => { const q = (a * ny + b) * nz + l0; return d[q] * (1 - fl) + d[q + 1] * fl; };
+          v = (at(i0, j0) * (1 - fi) + at(i0 + 1, j0) * fi) * (1 - fj) + (at(i0, j0 + 1) * (1 - fi) + at(i0 + 1, j0 + 1) * fi) * fj;
+        }
+      }
+      o[p] = o[p + 1] = o[p + 2] = v; o[p + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0); anchors = []; lobeGrid.fill(0);
+  svg.innerHTML = '<g font-size="13" font-weight="600" fill="#c8c8c8" text-anchor="middle"><text x="340" y="16">A</text><text x="340" y="466">P</text><text x="162" y="240">R</text><text x="518" y="240">L</text></g>';
+  $$('bxclock').textContent = (dy >= 0 ? '+' : '−') + Math.abs(dy * 1000).toFixed(0) + ' mm from mid-brain · level ' + h.toFixed(3) + ' m';
+}
 
 function sliceSegs(h) {
   const segs = [];
@@ -1800,6 +1827,7 @@ function sliceSegs(h) {
 }
 
 function update() {
+  if (VOL) return updateMNI();
   const h = 1.5 + level * 0.213, dy = h - C0, segs = sliceSegs(h);
   if (planes.transverse) { planes.transverse.visible = true; planes.transverse.position.y = h; }
   octx.clearRect(0, 0, W, H); octx.strokeStyle = '#000'; octx.lineWidth = 2.4; octx.lineCap = 'round'; octx.beginPath();
