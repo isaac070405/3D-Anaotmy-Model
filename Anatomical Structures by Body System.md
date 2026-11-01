@@ -146,7 +146,7 @@ _35 listed parts._
 - **Eye:** Sclera (eyeball), Choroid, Retina, Cornea, Iris, Pupil, Lens, Suspensory ligament of lens, Vitreous body, Lacrimal gland, Common tendinous ring, Trochlea
 - **Ear:** Auricle, External acoustic meatus, Tympanic membrane, Tympanic cavity, Malleus, Incus, Stapes, Vestibule, Anterior semicircular canal, Posterior semicircular canal, Lateral semicircular canal, Cochlea, Pharyngotympanic (auditory) tube
 
-_22 listed parts._
+_25 listed parts._
 
 ## Endocrine (thyroid, parathyroid, thymus)
 
