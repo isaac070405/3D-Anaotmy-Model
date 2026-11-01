@@ -15,3 +15,7 @@
 ## Eye meshes
 
 The eyeball (sclera, choroid, retina, vitreous body, cornea, iris and ciliary body, lens, suspensory ligament) uses meshes from feelpp/mesh.eye v1.1 (Zenodo 10.5281/zenodo.15630998, GPL-3.0-only; Chabannes, Prud'homme, Saigre, Sala, Szopos, Trophime). They load from `assets/eye.glb`, scaled to the sclera radius of the model, and the left eye is mirrored for the right. Solid names were matched from geometry (`scripts/eye_names.json`). The two retinal vessels in the source are not shown.
+
+## Brain from the MNI template
+
+The cerebral cortex, cerebral white matter and cerebellum come from the skull-stripped T1 MNI template (`tpl-mni_T1w`). `scripts/mni_brain_to_glb.py` thresholds grey and white matter with multi-Otsu, cuts the cerebellum and brainstem with landmark planes and an ellipsoid fitted by eye to this template, and writes `assets/mni_brain.glb`, fitted to the model's head size. The cerebellum edges and the cut below the temporal lobes are approximate, because the template has no atlas labels. Lobes, gyri and sulcus lines are gone, since they cannot be cut from an unlabelled volume. The brainstem, deep nuclei and ventricles are still the procedural parts. If the GLB is missing, the procedural cortex is used.

@@ -1,6 +1,6 @@
 # Structures, Tissues and Organs in the 3D Anatomical Model, by Body System
 
-Source: the parts lists the model shows in its sidebar (`anatomy-part1.js`, `anatomy-part2.js`, `anatomy-extras.js`), checked against the structures actually built in the model. Total: 974 parts across 13 systems.
+Source: the parts lists the model shows in its sidebar (`anatomy-part1.js`, `anatomy-part2.js`, `anatomy-extras.js`), checked against the structures actually built in the model. Total: 945 parts across 13 systems.
 
 Structures built in the model but missing from a sidebar list are shown in a separate "Also modelled" line. Left and right copies count once. Vertebrae C1 to L5, ribs 1 to 12 and the intervertebral discs are individual meshes that appear in the lists as ranges.
 
@@ -18,7 +18,7 @@ Structures built in the model but missing from a sidebar list are shown in a sep
 | Reproductive (female) and breast | 35 |
 | Eye and ear | 25 |
 | Endocrine (thyroid, parathyroid, thymus) | 7 |
-| Nervous | 160 |
+| Nervous | 131 |
 
 ## Skin
 
@@ -157,8 +157,7 @@ _7 listed parts._
 ## Nervous
 
 - **Face, jaw, orbit and larynx:** Infraorbital nerve, Zygomatic nerve, Superior alveolar nerves, Pterygopalatine ganglion, Inferior alveolar nerve, Mental nerve, Lingual nerve, Buccal nerve, Auriculotemporal nerve, Masseteric nerve, Mylohyoid nerve, Deep temporal nerves, Frontal nerve, Lacrimal nerve, Ciliary ganglion, Short ciliary nerves, Superior laryngeal nerve, Recurrent laryngeal nerve, Ansa cervicalis, Cochlear root (CN VIII), Vestibular root (CN VIII)
-- **Cerebrum:** Frontal lobe, Parietal lobe, Temporal lobe, Occipital lobe, Insula, Limbic lobe, Central sulcus, Lateral sulcus
-- **Gyri and lobules:** Precentral gyrus, Postcentral gyrus, Superior frontal gyrus, Middle frontal gyrus, Inferior frontal gyrus, Medial frontal gyrus, Frontal pole, Paracentral lobule, Superior parietal lobule, Supramarginal gyrus, Angular gyrus, Precuneus, Superior temporal gyrus, Middle temporal gyrus, Inferior temporal gyrus, Temporal pole, Occipital pole, Cuneus, Lingual gyrus, Fusiform gyrus, Cingulate gyrus, Parahippocampal gyrus, Subcallosal gyrus
+- **Cerebrum:** Cerebral cortex, Cerebral white matter
 - **Deep structures:** Corpus callosum, Septum pellucidum, Fornix, Anterior commissure, Thalamus, Pulvinar, Lateral geniculate body, Interthalamic adhesion, Hypothalamus, Mammillary body, Subthalamic nucleus, Pineal gland, Infundibulum, Adenohypophysis, Neurohypophysis, Optic chiasm, Optic tract, Caudate nucleus, Putamen, Globus pallidus, Amygdala, Hippocampus, Internal capsule
 - **Ventricular system:** Lateral ventricle, 3rd ventricle, Interventricular foramen, Cerebral aqueduct, 4th ventricle, Choroid plexus, Central canal
 - **Brainstem and cerebellum:** Midbrain, Cerebral peduncle, Superior colliculus, Inferior colliculus, Brachium of inferior colliculus, Pons, Medulla oblongata, Pyramid, Cerebellum
@@ -169,4 +168,4 @@ _7 listed parts._
 - **Leg:** Lumbosacral plexus, Femoral nerve, Saphenous nerve, Sciatic nerve, Tibial nerve, Common fibular nerve, Deep fibular nerve, Superficial fibular nerve, Medial sural cutaneous nerve, Lateral sural cutaneous nerve, Sural communicating nerve, Sural nerve
 - **Also modelled, not in the sidebar list:** Brachial plexus, C6, C7, C8 and T1 roots, Sympathetic trunk, Sympathetic ganglion
 
-_157 listed parts plus 3 more._
+_128 listed parts plus 3 more._

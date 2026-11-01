@@ -671,6 +671,26 @@ const LL = [
   ['sural', 'Sural nerve', [[0.104, 0.24, -0.052], [0.11, 0.15, -0.042], [0.118, 0.085, -0.03], [0.126, 0.05, -0.014], [0.131, 0.03, 0.03], [0.129, 0.024, 0.09]], 0.0013],
 ];
 for (const s of [-1, 1]) { const sd = SD(s), sc = SC(s); LL.forEach(([name, label, pts, r]) => ntube(name + '_' + sd, pts.map(p => [s * p[0], p[1], p[2]]), r, nm.nerve, label + ' (' + sd + ')', sc, 8)); }
+// ── MNI template brain replaces the procedural cortex, sulcus lines, insula and cerebellum ──
+// Source: tpl-mni_T1w (skull-stripped T1 template), surfaces built by scripts/mni_brain_to_glb.py. If the GLB is missing the procedural brain stays.
+{
+  let G3 = null;
+  try { const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'); const gl = await new GLTFLoader().loadAsync('assets/mni_brain.glb'); G3 = {}; gl.scene.traverse(o => { if (o.isMesh) { o.geometry.deleteAttribute('color'); if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); G3[o.name] = o.geometry; } }); if (!G3.cortex_left || !G3.cerebellum) G3 = null; } catch (er) { G3 = null; }
+  if (G3) {
+    const gone = []; G[NS].traverse(o => { if (o.isMesh && /^(cortex_|insula_|central_sulcus_|lateral_sulcus_|cerebellum_)/.test(o.name)) gone.push(o); });
+    gone.forEach(o => o.parent.remove(o));
+    Object.keys(cortexMats).forEach(k => delete cortexMats[k]);
+    const DS2 = THREE.DoubleSide, cx = M('cerebral_cortex', 0xd9b3ae, 0.7, { side: DS2 }), wmat = M('cerebral_white_matter', 0xf1ece4, 0.55, { side: DS2 }), cb = M('cerebellum_mni', 0xcda092, 0.7, { side: DS2 });
+    cortexMats.mni = cx;
+    for (const s of [-1, 1]) {
+      const sd = SD(s);
+      const add = (key, name, label, mt, side) => { const m = new THREE.Mesh(G3[key + '_' + sd], mt); m.position.set(0, C0, 0); return tag(reg(NS, name + '_' + sd, m, { label: label + ' (' + sd + ')' }), side); };
+      add('cortex', 'cortex_cerebral_cortex', 'Cerebral cortex', cx, SC(s));
+      if (G3['white_matter_' + sd]) add('white_matter', 'cerebral_white_matter', 'Cerebral white matter', wmat, SC(s)).renderOrder = 0;
+    }
+    { const m = new THREE.Mesh(G3.cerebellum, cb); m.position.set(0, C0, 0); tag(reg(NS, 'cerebellum', m, { label: 'Cerebellum' }), 'M'); }
+  }
+}
 window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
 // ───────── HEAD AND NECK DETAIL: eye, ear, nose and sinuses, larynx muscles, thyroid, face vessels and nerves ─────────
 {

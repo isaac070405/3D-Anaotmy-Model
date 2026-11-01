@@ -99,8 +99,7 @@ _62 listed parts._
 
 ### Nervous
 
-- **Cerebrum:** Frontal lobe, Parietal lobe, Temporal lobe, Occipital lobe, Insula, Limbic lobe, Central sulcus, Lateral sulcus
-- **Gyri and lobules:** Precentral gyrus, Postcentral gyrus, Superior frontal gyrus, Middle frontal gyrus, Inferior frontal gyrus, Medial frontal gyrus, Frontal pole, Paracentral lobule, Superior parietal lobule, Supramarginal gyrus, Angular gyrus, Precuneus, Superior temporal gyrus, Middle temporal gyrus, Inferior temporal gyrus, Temporal pole, Occipital pole, Cuneus, Lingual gyrus, Fusiform gyrus, Cingulate gyrus, Parahippocampal gyrus, Subcallosal gyrus
+- **Cerebrum:** Cerebral cortex, Cerebral white matter
 - **Deep structures:** Corpus callosum, Septum pellucidum, Fornix, Anterior commissure, Thalamus, Pulvinar, Lateral geniculate body, Interthalamic adhesion, Hypothalamus, Mammillary body, Subthalamic nucleus, Pineal gland, Infundibulum, Adenohypophysis, Neurohypophysis, Optic chiasm, Optic tract, Caudate nucleus, Putamen, Globus pallidus, Amygdala, Hippocampus, Internal capsule
 - **Ventricular system:** Lateral ventricle, 3rd ventricle, Interventricular foramen, Cerebral aqueduct, 4th ventricle, Choroid plexus, Central canal
 - **Brainstem and cerebellum:** Midbrain, Cerebral peduncle, Superior colliculus, Inferior colliculus, Brachium of inferior colliculus, Pons, Medulla oblongata, Pyramid, Cerebellum
@@ -110,7 +109,7 @@ _62 listed parts._
 - **Forearm and hand nerves:** Superficial branch of radial nerve, Deep branch of radial nerve, Anterior interosseous nerve, Palmar branch of median nerve, Dorsal branch of ulnar nerve, Palmar branch of ulnar nerve
 - **Leg:** Lumbosacral plexus, Femoral nerve, Saphenous nerve, Sciatic nerve, Tibial nerve, Common fibular nerve, Deep fibular nerve, Superficial fibular nerve, Medial sural cutaneous nerve, Lateral sural cutaneous nerve, Sural communicating nerve, Sural nerve
 
-_136 listed parts._
+_107 listed parts._
 
 ### Reproductive (female and breast)
 
