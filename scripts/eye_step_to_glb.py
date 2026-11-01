@@ -2,7 +2,7 @@
 """Convert the feelpp/mesh.eye STEP geometry (Zenodo 15630998, GPL-3.0) to one GLB.
 
 Input:  human_eye.stp from https://github.com/feelpp/mesh.eye (tag v1.1).
-        It holds 10 solids with no names, in millimetres, optical axis along +x.
+        It holds 10 solids with no names, in millimetres, optical axis along x (cornea at -x).
 Output: <out>.glb with one node per solid, in metres, three.js axes
         (x right, y up, z toward viewer), optic axis rotated onto +z (cornea faces +z).
         <out>_manifest.csv lists index, name, faces, volume in mL and bounding box.
@@ -69,8 +69,8 @@ def main():
     root = reader.OneShape()
     BRepMesh_IncrementalMesh(root, args.deflection, False, 0.3, True)
 
-    # mm, x = optic axis (cornea at +x)  ->  m, three.js: x'=y, y'=z, z'=x. Cyclic, det +1.
-    rot = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]], float)
+    # mm, x = optic axis (cornea at -x)  ->  m, three.js: x'=-y, y'=z, z'=-x. Rotation, det +1.
+    rot = np.array([[0, -1, 0], [0, 0, 1], [-1, 0, 0]], float)
     scene, rows = trimesh.Scene(), []
     it, i = TopoDS_Iterator(root), 0
     while it.More():
