@@ -1,6 +1,6 @@
 # Structures, Tissues and Organs in the 3D Anatomical Model, by Body System
 
-Source: the parts lists the model shows in its sidebar (`anatomy-part1.js`, `anatomy-part2.js`, `anatomy-extras.js`), checked against the structures actually built in the model. Total: 971 parts across 13 systems.
+Source: the parts lists the model shows in its sidebar (`anatomy-part1.js`, `anatomy-part2.js`, `anatomy-extras.js`), checked against the structures actually built in the model. Total: 974 parts across 13 systems.
 
 Structures built in the model but missing from a sidebar list are shown in a separate "Also modelled" line. Left and right copies count once. Vertebrae C1 to L5, ribs 1 to 12 and the intervertebral discs are individual meshes that appear in the lists as ranges.
 
@@ -16,7 +16,7 @@ Structures built in the model but missing from a sidebar list are shown in a sep
 | Urinary | 29 |
 | Reproductive (male) | 67 |
 | Reproductive (female) and breast | 35 |
-| Eye and ear | 22 |
+| Eye and ear | 25 |
 | Endocrine (thyroid, parathyroid, thymus) | 7 |
 | Nervous | 160 |
 
@@ -143,7 +143,7 @@ _35 listed parts._
 
 ## Eye and ear
 
-- **Eye:** Sclera (eyeball), Cornea, Iris, Pupil, Lens, Vitreous body, Lacrimal gland, Common tendinous ring, Trochlea
+- **Eye:** Sclera (eyeball), Choroid, Retina, Cornea, Iris, Pupil, Lens, Suspensory ligament of lens, Vitreous body, Lacrimal gland, Common tendinous ring, Trochlea
 - **Ear:** Auricle, External acoustic meatus, Tympanic membrane, Tympanic cavity, Malleus, Incus, Stapes, Vestibule, Anterior semicircular canal, Posterior semicircular canal, Lateral semicircular canal, Cochlea, Pharyngotympanic (auditory) tube
 
 _22 listed parts._

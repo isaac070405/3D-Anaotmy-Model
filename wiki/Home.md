@@ -29,7 +29,7 @@ Interactive three.js model of the human body. Systems can be toggled, parts sear
 | [Urinary](System-Urinary) | 29 |
 | [Reproductive (male)](System-Reproductive-male) | 67 |
 | [Reproductive (female) and breast](System-Reproductive-female-and-breast) | 35 |
-| [Eye and ear](System-Eye-and-ear) | 22 |
+| [Eye and ear](System-Eye-and-ear) | 25 |
 | [Endocrine (thyroid, parathyroid, thymus)](System-Endocrine-thyroid-parathyroid-thymus) | 7 |
 | [Nervous](System-Nervous) | 160 |
 | **Total** | **971** |

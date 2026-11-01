@@ -688,6 +688,11 @@ window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
   const mreg = (label, g, mt, pos) => mesh(MS, 'muscle_' + __nextMcount(), g, mt, label, pos);
   const face = (m, n) => { m.quaternion.setFromUnitVectors(V(0, 0, 1), n.clone().normalize()); return m; };
   const lumpy = (g, amp, f) => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), k = 1 + amp * Math.sin(x * f + 1.3) * Math.sin(y * f * 0.8 + 0.4) * Math.sin(z * f * 1.1 + 2.1); p.setXYZ(i, x * k, y * k, z * k); } g.computeVertexNormals(); return g; };
+  // Eye meshes from feelpp/mesh.eye v1.1 (Zenodo 10.5281/zenodo.15630998, GPL-3.0-only); the spheres below are the fallback if the file is missing.
+  HN.chor = M('choroid', 0x5b2b25, 0.6, { side: DS }); HN.ret = M('retina', 0xd98f7a, 0.6, { side: DS }); HN.zon = M('suspensory_ligament', 0xeadfd0, 0.5, { side: DS });
+  [HN.sclera, HN.vit, HN.cornea, HN.lens].forEach(m => { m.side = DS; });
+  let EYE = null;
+  try { const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'); const gl = await new GLTFLoader().loadAsync('assets/eye.glb'); EYE = {}; gl.scene.traverse(o => { if (o.isMesh) { o.geometry.deleteAttribute('color'); if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); EYE[o.name] = o.geometry; } }); if (!EYE.Sclera) EYE = null; } catch (er) { EYE = null; }
   for (const s of [-1, 1]) {
     const sd = s < 0 ? 'right' : 'left', T = s < 0 ? 'R' : 'L', P = p => [s * p[0], p[1], p[2]], lb = x => x + ' (' + sd + ')', n = x => x + '_' + sd;
     const art = (nm, l, pts, r = 0.0009) => tube(CSY, n(nm), pts.map(P), r, mat.artery, { label: lb(l) });
@@ -696,12 +701,20 @@ window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
     const mus = (l, pts, r, o = {}) => belly(lb(l), pts.map(P), r, { ...o, up: o.up && [s * o.up[0], o.up[1], o.up[2]] });
     // ── eye ──
     const E = V(s * 0.033, 1.639, 0.072), R = 0.0115, on = (x, y, z, k = 1) => E.clone().add(V(s * x, y, z).normalize().multiplyScalar(R * k));
+    if (EYE) {
+      const EK = R / 0.0125, em = (key, name, label, mt, ro) => { const m = new THREE.Mesh(EYE[key], mt); m.position.copy(E); m.scale.set(s * EK, EK, EK); const r = reg(SE, n(name), m, { label: lb(label) }); r.renderOrder = ro; return r; };
+      em('Sclera', 'sclera', 'Sclera (eyeball)', HN.sclera, 3); em('Choroid', 'choroid', 'Choroid', HN.chor, 2); em('Retina', 'retina', 'Retina', HN.ret, 2);
+      em('Vitreous_humor', 'vitreous_body', 'Vitreous body', HN.vit, 2); em('Cornea', 'cornea', 'Cornea', HN.cornea, 4); em('Iris_and_ciliary_body', 'iris', 'Iris', HN.iris, 1);
+      em('Lens', 'lens', 'Lens', HN.lens, 1); em('Suspensory_ligament', 'suspensory_ligament', 'Suspensory ligament of lens', HN.zon, 1);
+      mesh(SE, n('pupil'), new THREE.CircleGeometry(0.00168 * EK, 24), HN.pupil, lb('Pupil'), V(E.x, E.y, E.z + 0.0099 * EK));
+    } else {
     sph(SE, n('sclera'), R, E.toArray(), HN.sclera, { label: lb('Sclera (eyeball)') }).renderOrder = 3;
     sph(SE, n('vitreous_body'), R * 0.92, E.toArray(), HN.vit, { label: lb('Vitreous body') }).renderOrder = 2;
     sph(SE, n('cornea'), 0.0075, [E.x, E.y, E.z + R - 0.0053], HN.cornea, { label: lb('Cornea') }).renderOrder = 4;
     mesh(SE, n('iris'), new THREE.RingGeometry(0.0019, 0.0058, 36), HN.iris, lb('Iris'), V(E.x, E.y, E.z + 0.0098));
     mesh(SE, n('pupil'), new THREE.CircleGeometry(0.0019, 24), HN.pupil, lb('Pupil'), V(E.x, E.y, E.z + 0.0096));
     sph(SE, n('lens'), 0.0045, [E.x, E.y, E.z + 0.0083], HN.lens, { scale: [1, 1, 0.45], label: lb('Lens') });
+    }
     sph(SE, n('lacrimal_gland'), 1, [s * 0.044, 1.649, 0.077], HN.lacr, { scale: [0.0045, 0.0022, 0.0035], label: lb('Lacrimal gland') });
     const AP = [0.024, 1.634, 0.05];
     mesh(SE, n('common_tendinous_ring'), new THREE.TorusGeometry(0.0028, 0.0006, 8, 20), mm.ten, lb('Common tendinous ring'), V(...P(AP)));
