@@ -671,6 +671,27 @@ const LL = [
   ['sural', 'Sural nerve', [[0.104, 0.24, -0.052], [0.11, 0.15, -0.042], [0.118, 0.085, -0.03], [0.126, 0.05, -0.014], [0.131, 0.03, 0.03], [0.129, 0.024, 0.09]], 0.0013],
 ];
 for (const s of [-1, 1]) { const sd = SD(s), sc = SC(s); LL.forEach(([name, label, pts, r]) => ntube(name + '_' + sd, pts.map(p => [s * p[0], p[1], p[2]]), r, nm.nerve, label + ' (' + sd + ')', sc, 8)); }
+// ── MNI template brain replaces the procedural cortex, sulcus lines, insula and cerebellum ──
+// Source: tpl-mni_T1w (skull-stripped T1 template), surfaces built by scripts/mni_brain_to_glb.py. If the GLB is missing the procedural brain stays.
+{
+  let G3 = null;
+  try { const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'); const gl = await new GLTFLoader().loadAsync('assets/mni_brain.glb'); G3 = {}; gl.scene.traverse(o => { if (o.isMesh) { o.geometry.deleteAttribute('color'); if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); G3[o.name] = o.geometry; } }); if (!G3.cortex_left || !G3.cerebellum) G3 = null; } catch (er) { G3 = null; }
+  if (G3) {
+    const gone = []; G[NS].traverse(o => { if (o.isMesh && /^(cortex_|insula_|central_sulcus_|lateral_sulcus_|cerebellum_)/.test(o.name)) gone.push(o); });
+    gone.forEach(o => o.parent.remove(o));
+    Object.keys(cortexMats).forEach(k => delete cortexMats[k]);
+    const DS2 = THREE.DoubleSide, cx = M('cerebral_cortex', 0xd9b3ae, 0.7, { side: DS2 }), wmat = M('cerebral_white_matter', 0xf1ece4, 0.55, { side: DS2 }), cb = M('cerebellum_mni', 0xcda092, 0.7, { side: DS2 });
+    cortexMats.mni = cx;
+    for (const s of [-1, 1]) {
+      const sd = SD(s);
+      const add = (key, name, label, mt, side) => { const m = new THREE.Mesh(G3[key + '_' + sd], mt); m.position.set(0, C0, 0); return tag(reg(NS, name + '_' + sd, m, { label: label + ' (' + sd + ')' }), side); };
+      add('cortex', 'cortex_cerebral_cortex', 'Cerebral cortex', cx, SC(s));
+      if (G3['white_matter_' + sd]) add('white_matter', 'cerebral_white_matter', 'Cerebral white matter', wmat, SC(s)).renderOrder = 0;
+    }
+    { const m = new THREE.Mesh(G3.cerebellum, cb); m.position.set(0, C0, 0); tag(reg(NS, 'cerebellum', m, { label: 'Cerebellum' }), 'M'); }
+    window.__mniLoaded = true;
+  }
+}
 window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
 // ───────── HEAD AND NECK DETAIL: eye, ear, nose and sinuses, larynx muscles, thyroid, face vessels and nerves ─────────
 {
@@ -688,6 +709,13 @@ window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
   const mreg = (label, g, mt, pos) => mesh(MS, 'muscle_' + __nextMcount(), g, mt, label, pos);
   const face = (m, n) => { m.quaternion.setFromUnitVectors(V(0, 0, 1), n.clone().normalize()); return m; };
   const lumpy = (g, amp, f) => { const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), k = 1 + amp * Math.sin(x * f + 1.3) * Math.sin(y * f * 0.8 + 0.4) * Math.sin(z * f * 1.1 + 2.1); p.setXYZ(i, x * k, y * k, z * k); } g.computeVertexNormals(); return g; };
+  // Eye meshes from feelpp/mesh.eye v1.1 (Zenodo 10.5281/zenodo.15630998, GPL-3.0-only); the spheres below are the fallback if the file is missing.
+  HN.chor = M('choroid', 0x5b2b25, 0.6, { side: DS }); HN.ret = M('retina', 0xd98f7a, 0.6, { side: DS }); HN.zon = M('suspensory_ligament', 0xeadfd0, 0.5, { side: DS });
+  [HN.sclera, HN.vit, HN.cornea, HN.lens].forEach(m => { m.side = DS; });
+  // The sclera and vitreous shells touch the choroid, retina and ciliary body; a small depth offset stops the depth test flipping per pixel (patchy shading).
+  [HN.sclera, HN.vit].forEach(m => { m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -2; });
+  let EYE = null;
+  try { const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'); const gl = await new GLTFLoader().loadAsync('assets/eye.glb'); EYE = {}; gl.scene.traverse(o => { if (o.isMesh) { o.geometry.deleteAttribute('color'); if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); EYE[o.name] = o.geometry; } }); if (!EYE.Sclera) EYE = null; } catch (er) { EYE = null; }
   for (const s of [-1, 1]) {
     const sd = s < 0 ? 'right' : 'left', T = s < 0 ? 'R' : 'L', P = p => [s * p[0], p[1], p[2]], lb = x => x + ' (' + sd + ')', n = x => x + '_' + sd;
     const art = (nm, l, pts, r = 0.0009) => tube(CSY, n(nm), pts.map(P), r, mat.artery, { label: lb(l) });
@@ -696,12 +724,20 @@ window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
     const mus = (l, pts, r, o = {}) => belly(lb(l), pts.map(P), r, { ...o, up: o.up && [s * o.up[0], o.up[1], o.up[2]] });
     // ── eye ──
     const E = V(s * 0.033, 1.639, 0.072), R = 0.0115, on = (x, y, z, k = 1) => E.clone().add(V(s * x, y, z).normalize().multiplyScalar(R * k));
+    if (EYE) {
+      const EK = R / 0.0125, em = (key, name, label, mt, ro) => { const m = new THREE.Mesh(EYE[key], mt); m.position.copy(E); m.scale.set(s * EK, EK, EK); const r = reg(SE, n(name), m, { label: lb(label) }); r.renderOrder = ro; return r; };
+      em('Sclera', 'sclera', 'Sclera (eyeball)', HN.sclera, 3); em('Choroid', 'choroid', 'Choroid', HN.chor, 2); em('Retina', 'retina', 'Retina', HN.ret, 2);
+      em('Vitreous_humor', 'vitreous_body', 'Vitreous body', HN.vit, 2); em('Cornea', 'cornea', 'Cornea', HN.cornea, 4); em('Iris_and_ciliary_body', 'iris', 'Iris', HN.iris, 1);
+      em('Lens', 'lens', 'Lens', HN.lens, 1); em('Suspensory_ligament', 'suspensory_ligament', 'Suspensory ligament of lens', HN.zon, 1);
+      mesh(SE, n('pupil'), new THREE.CircleGeometry(0.00168 * EK, 24), HN.pupil, lb('Pupil'), V(E.x, E.y, E.z + 0.0099 * EK));
+    } else {
     sph(SE, n('sclera'), R, E.toArray(), HN.sclera, { label: lb('Sclera (eyeball)') }).renderOrder = 3;
     sph(SE, n('vitreous_body'), R * 0.92, E.toArray(), HN.vit, { label: lb('Vitreous body') }).renderOrder = 2;
     sph(SE, n('cornea'), 0.0075, [E.x, E.y, E.z + R - 0.0053], HN.cornea, { label: lb('Cornea') }).renderOrder = 4;
     mesh(SE, n('iris'), new THREE.RingGeometry(0.0019, 0.0058, 36), HN.iris, lb('Iris'), V(E.x, E.y, E.z + 0.0098));
     mesh(SE, n('pupil'), new THREE.CircleGeometry(0.0019, 24), HN.pupil, lb('Pupil'), V(E.x, E.y, E.z + 0.0096));
     sph(SE, n('lens'), 0.0045, [E.x, E.y, E.z + 0.0083], HN.lens, { scale: [1, 1, 0.45], label: lb('Lens') });
+    }
     sph(SE, n('lacrimal_gland'), 1, [s * 0.044, 1.649, 0.077], HN.lacr, { scale: [0.0045, 0.0022, 0.0035], label: lb('Lacrimal gland') });
     const AP = [0.024, 1.634, 0.05];
     mesh(SE, n('common_tendinous_ring'), new THREE.TorusGeometry(0.0028, 0.0006, 8, 20), mm.ten, lb('Common tendinous ring'), V(...P(AP)));
@@ -1747,6 +1783,38 @@ const LN = { frontal: 'Frontal lobe', parietal: 'Parietal lobe', temporal: 'Temp
 const rgb = hex => [(hex >> 16) & 255, (hex >> 8) & 255, hex & 255], cl = (x, a, b) => Math.min(b, Math.max(a, x));
 const px = x => (x - X0) * S, py = z => (Z1 - z) * S;
 let mode = 'mri', isOpen = false, saved = null, anchors = [], level = 0.728;
+// Real template slices: assets/mni_brain_t1.bin (uint8 volume) and .json (shape, metres per voxel, centre voxel) come from scripts/mni_brain_to_glb.py.
+let VOL = null;
+if (window.__mniLoaded) { try {
+  const rj = await fetch('assets/mni_brain_t1.json'), rb = await fetch('assets/mni_brain_t1.bin'); if (!rj.ok || !rb.ok) throw new Error('template volume not found');
+  const meta = await rj.json(), buf = await rb.arrayBuffer(); if (buf.byteLength !== meta.shape[0] * meta.shape[1] * meta.shape[2]) throw new Error('template volume has the wrong size');
+  VOL = { ...meta, data: new Uint8Array(buf) }; } catch (er) { VOL = null; } }
+if (VOL) {
+  const [nx, ny, nz] = VOL.shape, cnt = new Int32Array(nz); for (let i = 0; i < nx * ny; i++) for (let l = 0; l < nz; l++) if (VOL.data[i * nz + l] > 8) cnt[l]++;
+  let z0 = 0, z1 = nz - 1; while (z0 < nz - 1 && cnt[z0] < 50) z0++; while (z1 > 0 && cnt[z1] < 50) z1--; VOL.z0 = z0 + 1; VOL.z1 = z1 - 1;
+  level = (VOL.centre[2] - VOL.z0) / (VOL.z1 - VOL.z0); $$('bxsl').value = level; $$('bxatlas').style.display = 'none'; const key = document.querySelector('#brainbox .bxkey'); if (key) key.innerHTML = '<span>MNI template T1, 1 mm slices</span><span style="margin-left:auto">Anterior up · patient\'s right on the left</span>'; }
+function updateMNI() {
+  const h = C0 + (VOL.z0 + level * (VOL.z1 - VOL.z0) - VOL.centre[2]) * VOL.voxel_m[2], dy = h - C0, [nx, ny, nz] = VOL.shape, [cx, cy, cz] = VOL.centre, [kx, ky, kz] = VOL.voxel_m, d = VOL.data;
+  if (planes.transverse) { planes.transverse.visible = true; planes.transverse.position.y = h; }
+  const l = cz + dy / kz, l0 = Math.floor(l), fl = l - l0, img = ctx.createImageData(W, H), o = img.data, inZ = l0 >= 0 && l0 + 1 < nz;
+  for (let y = 0; y < H; y++) {
+    const j = cy + (Z1 - (y + 0.5) / S) / ky, j0 = Math.floor(j), fj = j - j0;
+    for (let x = 0; x < W; x++) {
+      const p = (y * W + x) * 4; let v = 0;
+      if (inZ && j0 >= 0 && j0 + 1 < ny) {
+        const i = cx - (X0 + (x + 0.5) / S) / kx, i0 = Math.floor(i), fi = i - i0;
+        if (i0 >= 0 && i0 + 1 < nx) {
+          const at = (a, b) => { const q = (a * ny + b) * nz + l0; return d[q] * (1 - fl) + d[q + 1] * fl; };
+          v = (at(i0, j0) * (1 - fi) + at(i0 + 1, j0) * fi) * (1 - fj) + (at(i0, j0 + 1) * (1 - fi) + at(i0 + 1, j0 + 1) * fi) * fj;
+        }
+      }
+      o[p] = o[p + 1] = o[p + 2] = v; o[p + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0); anchors = []; lobeGrid.fill(0);
+  svg.innerHTML = '<g font-size="13" font-weight="600" fill="#c8c8c8" text-anchor="middle"><text x="340" y="16">A</text><text x="340" y="466">P</text><text x="162" y="240">R</text><text x="518" y="240">L</text></g>';
+  $$('bxclock').textContent = (dy >= 0 ? '+' : '−') + Math.abs(dy * 1000).toFixed(0) + ' mm from mid-brain · level ' + h.toFixed(3) + ' m';
+}
 
 function sliceSegs(h) {
   const segs = [];
@@ -1767,6 +1835,7 @@ function sliceSegs(h) {
 }
 
 function update() {
+  if (VOL) return updateMNI();
   const h = 1.5 + level * 0.213, dy = h - C0, segs = sliceSegs(h);
   if (planes.transverse) { planes.transverse.visible = true; planes.transverse.position.y = h; }
   octx.clearRect(0, 0, W, H); octx.strokeStyle = '#000'; octx.lineWidth = 2.4; octx.lineCap = 'round'; octx.beginPath();
