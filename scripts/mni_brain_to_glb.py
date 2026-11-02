@@ -135,12 +135,13 @@ def main():
 
     # T1 volume for the viewer's axial series: uint8, C order [x][y][z] in the reoriented grid
     # (x index grows toward patient right, y toward anterior, z toward superior), plus the mapping
-    # from voxel index to viewer metres: x_v = -(i - cx) * k, z_v = (j - cy) * k, y_v = (l - cz) * k.
+    # from voxel index to viewer metres, with voxel_m = metres per voxel along each axis:
+    # x_v = -(i - cx) * voxel_m[0], z_v = (j - cy) * voxel_m[1], y_v = (l - cz) * voxel_m[2].
     hi_v = np.percentile(d[d > 0], 99.5)
     vol8 = np.clip(d / hi_v * 255.0, 0, 255).astype(np.uint8)
     vol8.tofile(str(args.out) + "_t1.bin")
     centre = ((lo + hi) / 2.0).tolist()
-    json.dump({"shape": list(d.shape), "k": float(args.k), "centre": centre},
+    json.dump({"shape": list(d.shape), "voxel_m": (args.k * zoom).tolist(), "centre": centre},
               open(str(args.out) + "_t1.json", "w"))
     print("wrote", str(args.out) + "_t1.bin", f"({vol8.nbytes / 1e6:.1f} MB)")
 
