@@ -713,9 +713,9 @@ window.__brain = { cortexMats, classify, lobeCol, C0, B, CL };
   HN.chor = M('choroid', 0x5b2b25, 0.6, { side: DS }); HN.ret = M('retina', 0xd98f7a, 0.6, { side: DS }); HN.zon = M('suspensory_ligament', 0xeadfd0, 0.5, { side: DS });
   [HN.sclera, HN.vit, HN.cornea, HN.lens].forEach(m => { m.side = DS; });
   // The sclera and vitreous shells touch the choroid, retina and ciliary body; a small depth offset stops the depth test flipping per pixel (patchy shading).
-  [HN.sclera, HN.vit].forEach(m => { m.polygonOffset = true; m.polygonOffsetFactor = -2; m.polygonOffsetUnits = -2; });
+  [HN.sclera, HN.vit].forEach(m => { m.polygonOffset = true; m.polygonOffsetFactor = -6; m.polygonOffsetUnits = -12; });
   let EYE = null;
-  try { const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'); const gl = await new GLTFLoader().loadAsync('assets/eye.glb'); EYE = {}; gl.scene.traverse(o => { if (o.isMesh) { o.geometry.deleteAttribute('color'); if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals(); EYE[o.name] = o.geometry; } }); if (!EYE.Sclera) EYE = null; } catch (er) { EYE = null; }
+  try { const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js'); const gl = await new GLTFLoader().loadAsync('assets/eye.glb'); EYE = {}; gl.scene.traverse(o => { if (o.isMesh) { o.geometry.deleteAttribute('color'); o.geometry.deleteAttribute('normal'); o.geometry.computeVertexNormals(); EYE[o.name] = o.geometry; } }); if (!EYE.Sclera) EYE = null; } catch (er) { EYE = null; }
   for (const s of [-1, 1]) {
     const sd = s < 0 ? 'right' : 'left', T = s < 0 ? 'R' : 'L', P = p => [s * p[0], p[1], p[2]], lb = x => x + ' (' + sd + ')', n = x => x + '_' + sd;
     const art = (nm, l, pts, r = 0.0009) => tube(CSY, n(nm), pts.map(P), r, mat.artery, { label: lb(l) });

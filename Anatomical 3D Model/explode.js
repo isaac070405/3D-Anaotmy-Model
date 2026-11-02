@@ -16,7 +16,7 @@ const REGIONS = [
   { k: 'torso', name: 'Torso & pelvis', test: c => Math.abs(c.x) < 0.17 && c.y > 0.74 && c.y < 1.5 },
   { k: 'head', name: 'Head & neck', test: c => c.y >= 1.5 },
   { k: 'arm', name: 'Upper extremity', test: c => Math.abs(c.x) >= 0.17 && c.y > 0.6 && c.y < 1.5 },
-  { k: 'leg', name: 'Lower extremity', test: c => c.y <= 0.74 },
+  { k: 'leg', name: 'Lower extremity', test: c => Math.abs(c.x) < 0.17 && c.y <= 0.74 },
 ];
 const LYMPH = /lymph|node|spleen|thymus|tonsil|thoracic duct|cisterna/i, VEINISH = /vein|venous|sinus|plexus|vena cava/i;
 
