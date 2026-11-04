@@ -61,6 +61,9 @@ function init() {
     <label class="chk"><input type="checkbox" id="camfocus" checked> Zoom to a structure when clicked</label>`;
   document.body.appendChild(box);
   const markPreset = k => box.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === k));
+  // the opening view, for the Space shortcut
+  const home = { p: cam.position.clone(), t: ctl.target.clone() };
+  window.__camHome = () => { markPreset(null); flyTo(home.p, home.t, 650); };
   // keep the current target and distance, so a preset also works while zoomed on an organ
   box.addEventListener('click', e => {
     const b = e.target.closest('[data-p]'); if (!b) return;

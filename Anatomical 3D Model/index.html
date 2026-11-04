@@ -144,6 +144,7 @@
   <div class="tw"><h2>Presentation</h2><div class="seg" id="tw-present"><button class="b" data-v="off">Explore</button><button class="b" data-v="on">Turntable</button></div><div class="note">Turntable hides the panels and slowly rotates the body.</div></div>
 </div>
 <div id="tip"></div>
+<div id="live" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"></div>
 
 <aside class="panel" data-comment-anchor="e05a1aae89-aside">
   <div class="kicker">Plate II · Systems of the body</div>
@@ -267,6 +268,7 @@
   <div class="sec info" id="info"></div>
 
   <div class="foot">Left and right are the figure's own. Drag to turn, scroll to zoom. Downloads include the systems currently shown, minus removed parts.</div>
+  <div class="foot" style="border-top:0;padding-top:4px"><b>Keys:</b> Space resets the view, H hides the selected part, U undoes, X toggles X-ray, 1 2 3 set the cut to transverse, coronal or sagittal.</div>
 </aside>
 
 <div id="slicebox">
@@ -299,5 +301,6 @@
 <script type="module" src="explode.js"></script>
 <script type="module" src="camera-tools.js"></script>
 <script type="module" src="explode-slider.js"></script>
+<script type="module" src="shortcuts.js"></script>
 </body>
 </html>

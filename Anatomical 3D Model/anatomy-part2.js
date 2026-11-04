@@ -1766,13 +1766,25 @@ window.requestSliceNow = requestSlice;
   cv.addEventListener('pointerdown', e => { dn = [e.clientX, e.clientY, performance.now()]; });
   cv.addEventListener('pointerup', e => {
     if (!dn || e.button !== 0) return; const d = Math.hypot(e.clientX - dn[0], e.clientY - dn[1]), dt = performance.now() - dn[2]; dn = null; if (d > 5 || dt > 600) return;
-    const rc = cv.getBoundingClientRect(); nd.set(((e.clientX - rc.left) / rc.width) * 2 - 1, -((e.clientY - rc.top) / rc.height) * 2 + 1);
-    model.updateMatrixWorld(true); rs.setFromCamera(nd, cam); rs.near = 0; rs.far = 0.0085;
-    // cut-open tubes are seen from inside, so back faces must count
-    const ms = [], old = []; model.traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.userData.sys !== 'skin' && vis(o)) { ms.push(o); old.push(o.material); o.material = dbl; } });
-    const hs = rs.intersectObjects(ms, false); ms.forEach((o, i) => { o.material = old[i]; });
-    const h = hs[0]; if (!h || !h.object.userData.label || !window.__select) return;
-    window.__select(h.object); requestSlice();
+    const rc = cv.getBoundingClientRect(), cx = ((e.clientX - rc.left) / rc.width) * 2 - 1, cy = -((e.clientY - rc.top) / rc.height) * 2 + 1;
+    model.updateMatrixWorld(true); cam.updateMatrixWorld(true); rs.near = 0; rs.far = 0.0085;
+    // only meshes whose bounding sphere reaches into the 8 mm slab can be on screen
+    const nrm = cam.getWorldDirection(new THREE.Vector3()), sph = new THREE.Sphere(), dv = new THREE.Vector3(), ms = [], old = [];
+    model.traverse(o => { if (!o.isMesh || o.isInstancedMesh || o.userData.sys === 'skin' || !vis(o)) return;
+      const g = o.geometry; if (!g.boundingSphere) g.computeBoundingSphere(); sph.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);
+      const dd = dv.copy(sph.center).sub(cam.position).dot(nrm); if (dd + sph.radius >= 0 && dd - sph.radius <= 0.0085) { ms.push(o); old.push(o.material); o.material = dbl; } });
+    // walls of a cut tube are edge-on and about a pixel wide, so look at rings of points around the click, nearest ring first
+    let hit = null;
+    for (const [r, k] of [[0, 1], [2, 8], [4, 8], [6, 10], [9, 12]]) {
+      for (let i = 0; i < k && !hit; i++) {
+        const a = (i / k) * Math.PI * 2; nd.set(cx + Math.cos(a) * r * 2 / rc.width, cy + Math.sin(a) * r * 2 / rc.height); rs.setFromCamera(nd, cam);
+        const h = rs.intersectObjects(ms, false).find(x => x.object.userData.label); if (h) hit = h;
+      }
+      if (hit) break;
+    }
+    ms.forEach((o, i) => { o.material = old[i]; });
+    if (!hit || !window.__select) return;
+    window.__select(hit.object); requestSlice();
   }); }
 ['change', 'click'].forEach(ev => document.addEventListener(ev, () => requestSlice()));
 setAxis('transverse'); setTimeout(requestSlice, 400);
