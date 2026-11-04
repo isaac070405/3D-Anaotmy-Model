@@ -249,6 +249,14 @@
     <div class="tick"><span>Skin</span><span>Muscle</span><span>Organs</span><span>Bone</span></div>
   </div>
 
+  <div class="sec" id="expsec">
+    <h2>Exploded view</h2>
+    <div class="rowl"><span>Spread parts apart</span><b id="expn">0%</b></div>
+    <input type="range" id="expsl" min="0" max="100" step="1" value="0" aria-label="Exploded view amount">
+    <div class="tick"><span>Assembled</span><span>Spread</span></div>
+    <p class="parts" id="expnote" style="margin-top:6px">Every structure moves away from the midline in proportion to its distance from it, and from front to back as well. Skin and fat stay in place.</p>
+  </div>
+
   <div class="sec">
     <h2>Dissect</h2>
     <div class="dz">Click any structure to select it. Its tab can hide it, and Undo brings hidden structures back.</div>
@@ -290,5 +298,6 @@
 <script type="module" src="layers.js"></script>
 <script type="module" src="explode.js"></script>
 <script type="module" src="camera-tools.js"></script>
+<script type="module" src="explode-slider.js"></script>
 </body>
 </html>
