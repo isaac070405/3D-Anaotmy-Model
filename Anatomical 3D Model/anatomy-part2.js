@@ -1646,6 +1646,7 @@ function setPin(label, text) {
   if ([].concat(label).some(l => l.startsWith('Magnified')) && window.__alvG) { if (!$('alvshow').checked) { $('alvshow').checked = true; $('alvshow').onchange({ target: $('alvshow') }); } }
   const b = new THREE.Box3(); es.forEach(e => e.meshes.forEach(m => b.expandByObject(m))); pin.c = b.getCenter(new THREE.Vector3());
   $('pintxt').textContent = text || [].concat(label)[0]; pin.on = true; sel = es[0].sys; showInfo(); requestSlice(); trackPin();
+  if (window.__onPin) window.__onPin([].concat(label)[0], es[0].sys);
 }
 function clearPin() { pin.on = false; ['pinsvg'].forEach(i => $(i).style.display = 'none'); $('pinlbl').style.display = 'none'; }
 function trackPin() {
@@ -1662,6 +1663,7 @@ function trackPin() {
 }
 $('pinx').onclick = clearPin;
 $('q').addEventListener('input', e => {
+  if (window.__search) return;   // search.js takes over the results list
   if (!index) buildIndex();
   const q = e.target.value.trim().toLowerCase(), box = $('qres'); box.innerHTML = '';
   if (!q) return;
@@ -1669,6 +1671,16 @@ $('q').addEventListener('input', e => {
   if (!hits.length) { box.innerHTML = '<div style="font-size:12px;color:var(--color-neutral-700);padding:4px">No match</div>'; return; }
   hits.forEach(k => { const b = document.createElement('button'); b.className = 'res'; b.innerHTML = '<span></span><small></small>'; b.firstChild.textContent = k; b.lastChild.textContent = SYSNAME[index.get(k).sys]; b.onclick = () => { setPin(k); }; box.appendChild(b); });
 });
+// hooks for search.js and tree.js: the system and part lists, the part-name matcher the Parts list uses, and pinning
+window.__setPin = setPin;
+window.__tree = {
+  SYS, SYSNAME,
+  partMatches: (p, k) => { const q = p.toLowerCase().split(' (')[0].split(': ')[0], l = k.toLowerCase(); return k.startsWith(p.split(' (')[0]) || l.includes(q) || (q.includes(' and ') && q.split(' and ').some(w => w.length > 3 && l.includes(w))); },
+  labels: () => { if (!index) buildIndex(); return index; },
+  pick(sk, p) { if (!index) buildIndex(); const keys = [...index.keys()], q = p.toLowerCase().split(' (')[0].split(': ')[0];
+    const m = keys.filter(k => this.partMatches(p, k)).filter(k => index.get(k).sys === sk), hit = m.find(k => index.get(k).meshes.some(x => vis(x))) || m[0];
+    if (hit) setPin(sk === 'nervous' && m.length > 1 ? m : hit, p); return !!hit; },
+};
 $('q').addEventListener('keydown', e => { if (e.key === 'Enter') { const f = $('qres').querySelector('.res'); if (f) f.click(); } });
 
 // peel layers
