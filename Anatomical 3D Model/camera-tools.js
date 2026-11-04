@@ -14,8 +14,12 @@ function init() {
   // arcs around the target at a steady distance instead of cutting through the body.
   let tw = null, onDone = null;
   function stopFly() { if (!tw) return; tw = null; if (onDone) { onDone(); onDone = null; } }
+  // the near plane follows the target distance, so views a few centimetres from the ear or eye are not clipped
+  const nearFor = d => Math.min(0.033, Math.max(0.002, d / 25));
   function flyTo(pos, tgt, ms = 650, done) {
     stopFly();
+    const nn = nearFor(pos.distanceTo(tgt)); cam.near = Math.min(cam.near, nn); cam.far = Math.max(cam.far, 20); cam.updateProjectionMatrix();
+    const done0 = done; done = () => { cam.near = nn; cam.updateProjectionMatrix(); if (done0) done0(); };
     const t1 = tgt.clone(), s0 = new THREE.Spherical().setFromVector3(cam.position.clone().sub(ctl.target)), s1 = new THREE.Spherical().setFromVector3(pos.clone().sub(tgt));
     const dTheta = ((((s1.theta - s0.theta) % TAU) + 3 * Math.PI) % TAU) - Math.PI;
     if (reduce || ms <= 0) { ctl.target.copy(t1); cam.position.copy(pos); ctl.update(); if (done) done(); return; }
@@ -63,6 +67,7 @@ function init() {
   const markPreset = k => box.querySelectorAll('[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === k));
   // the opening view, for the Space shortcut
   const home = { p: cam.position.clone(), t: ctl.target.clone() };
+  window.__camFly = flyTo;
   window.__camHome = () => { markPreset(null); flyTo(home.p, home.t, 650); };
   // keep the current target and distance, so a preset also works while zoomed on an organ
   box.addEventListener('click', e => {

@@ -1,5 +1,8 @@
 import { stage, THREE, V, model, SYS, G, M, mat, reg, xf, sph, box, Y, seg, tube, SK, zc, skPt, MS, mm, belly, SU, DP, __nextMcount } from './anatomy-part1.js';
 import './anatomy-extras.js';
+import './anatomy-alveolus.js';
+import './anatomy-tooth.js';
+import './anatomy-lymph.js';
 
 
 // ───────── URINARY ─────────

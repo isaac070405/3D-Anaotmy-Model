@@ -13,6 +13,7 @@ function init() {
     dock.querySelector('[data-d=slice]').classList.toggle('on', sl); dock.querySelector('[data-d=slice]').setAttribute('aria-pressed', sl);
   };
   const drawer = on => { document.body.classList.toggle('drawer-open', on); if (on && sliceShown()) $('sliceclose').click(); sync(); };
+  window.__drawer = drawer;
   const slice = on => { if (document.body.classList.contains('exploded')) return; if (on && !sliceShown()) { drawer(false); $('sliceopen').click(); } else if (!on && sliceShown()) $('sliceclose').click(); sync(); };
   dock.addEventListener('click', e => {
     const b = e.target.closest('[data-d]'); if (!b) return;

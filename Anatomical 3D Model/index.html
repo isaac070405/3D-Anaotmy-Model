@@ -67,7 +67,9 @@
   .pi{font:inherit;font-size:12.5px;text-align:left;background:transparent;border:0;border-bottom:1px solid transparent;color:var(--color-text);padding:1px 0;cursor:pointer}
   .pi:hover{color:var(--color-accent-700);border-bottom-color:var(--color-accent-500)}
   .vb{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-  .vb .b.on{background:var(--color-accent-200)}
+  .vb .b.on,.vr .b.on{background:var(--color-accent-200)}
+  .vr{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  h3.sub{font-family:var(--font-heading);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700);margin:12px 0 6px}
   #brainbox{overflow:auto;max-height:calc(100vh - 48px);position:fixed;left:380px;right:24px;top:24px;max-width:736px;margin:0 auto;display:none;z-index:4;box-sizing:border-box;background:color-mix(in oklab,var(--color-bg) 97%,transparent);border:1px solid var(--color-divider);border-radius:var(--radius-md,4px);padding:14px 16px 12px;box-shadow:var(--shadow-md)}
   #brainbox .hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
   #brainbox .hd b{font-family:var(--font-heading);font-size:22px;font-weight:600}
@@ -214,42 +216,71 @@
     <input type="range" id="rough" min="0" max="1" step="0.01" value="0.55" aria-label="Surface roughness">
   </div>
 
-  <div class="sec">
-    <h2>Heart, lungs and diaphragm</h2>
-    <div class="vb"><button class="b" data-v="heart" data-comment-anchor="3d03b4898d-button">Heart view</button><button class="b" data-v="thorax">Thorax</button></div>
-    <label class="chk" style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:6px"><input type="checkbox" id="hcut"> Heart cutaway (open the chambers)</label>
-    <div class="rowl"><span>Cut depth</span></div>
-    <input type="range" id="hdepth" min="-0.01" max="0.095" step="0.002" value="0.05" aria-label="Heart cut depth">
-    <label class="chk" style="display:flex;gap:8px;align-items:center;font-size:13px;margin:8px 0 6px"><input type="checkbox" id="alvshow"> Show magnified alveolar unit beside the figure</label>
-    <div class="rowl" style="margin-top:8px"><span>Lung opacity</span></div>
-    <input type="range" id="lungop" min="0.1" max="1" step="0.01" value="0.82" aria-label="Lung opacity">
-  </div>
-
-  <div class="sec">
-    <h2>Brain and spine views</h2>
-    <div class="vb"><button class="b" data-v="lateral">Lateral</button><button class="b" data-v="medial">Medial</button><button class="b" data-v="inferior">Inferior</button><button class="b" data-v="spine">Spine</button><button class="b" data-v="reset">Reset</button><button class="b" id="axialopen">Brain axial</button></div>
+  <div id="bodyparts">
+  <div id="viewnote" aria-live="polite" style="display:none;font-size:12px;line-height:1.4;color:var(--color-neutral-700);margin:12px 0 0;padding:6px 8px;border:1px solid var(--color-divider);border-radius:var(--radius-md,4px)"></div>
+  <div class="sec" id="g-brain">
+    <h2>1. Brain and spine views</h2>
+    <div class="vb"><button class="b" data-v="lateral">Lateral</button><button class="b" data-v="medial">Medial</button><button class="b" data-v="inferior">Inferior</button><button class="b" data-v="spine">Spine</button><button class="b" id="axialopen">Brain axial</button><button class="b" data-r="reset">Reset</button></div>
     <div class="rowl"><span>Cortex opacity</span></div>
     <input type="range" id="cortexop" min="0.1" max="1" step="0.01" value="1" aria-label="Cortex opacity">
+    <div class="vb" hidden><button class="b" data-v="reset" id="oldreset">Reset</button></div>
   </div>
 
-  <div class="sec">
-    <h2>Renal and reproductive</h2>
-    <div class="vb"><button class="b" data-v="kidneys">Kidneys</button><button class="b" data-v="kidneysback">Kidneys from behind</button><button class="b" data-v="pelvis">Bladder and pelvis</button><button class="b" data-v="repro">Reproductive organs</button><button class="b" data-v="reproside">Reproductive pelvis from the side</button><button class="b" data-v="cycle">Ovaries and uterus close-up (female)</button><button class="b" data-v="breast">Breast (female)</button><button class="b" data-v="breastside">Breast from the side (female)</button><button class="b" data-v="reset">Reset</button></div>
+  <div class="sec" id="g-head">
+    <h2>2. Head: eye, ear, nose, mouth, skull</h2>
+    <h3 class="sub">Eye and ear</h3>
+    <div class="vr"><button class="b" data-r="eye">Eye</button><button class="b" data-r="earouter">Ear: outer</button><button class="b" data-r="earmiddle">Ear: middle</button><button class="b" data-r="earinner">Ear: inner</button><button class="b" data-r="earall">Ear: all</button></div>
+    <h3 class="sub">Nose and mouth</h3>
+    <div class="vr"><button class="b" data-r="nasal">Nasal cavity</button><button class="b" data-r="oral">Oral cavity</button><button class="b" data-r="teeth">Teeth</button><button class="b" data-r="tooth">Single tooth</button><button class="b" data-r="oralall">Oral cavity with teeth</button></div>
+    <h3 class="sub">Skull</h3>
+    <div class="vr"><button class="b" data-r="skull">Skull and teeth</button><button class="b" data-r="reset">Reset</button></div>
+  </div>
+
+  <div class="sec" id="g-neck">
+    <h2>3. Neck</h2>
+    <div class="vr"><button class="b" data-r="neck">Neck: organs, vessels, nerves</button><button class="b" data-r="neckmuscle">Neck muscles</button><button class="b" data-r="reset">Reset</button></div>
+  </div>
+
+  <div class="sec" id="g-trunk">
+    <h2>4. Thoracic and abdominal cavity</h2>
+    <h3 class="sub">Heart</h3>
+    <div class="vr"><button class="b" data-r="greatvessels">Eight great vessels</button><button class="b" data-r="chambers">Chambers and valves</button><button class="b" data-r="coronary">Coronary arteries and veins</button></div>
+    <label class="chk" style="display:flex;gap:8px;align-items:center;font-size:13px;margin:8px 0 6px"><input type="checkbox" id="hcut"> Heart cutaway (open the chambers)</label>
+    <div class="rowl"><span>Cut depth</span></div>
+    <input type="range" id="hdepth" min="-0.01" max="0.095" step="0.002" value="0.05" aria-label="Heart cut depth">
+    <h3 class="sub">Lungs and diaphragm</h3>
+    <div class="vb"><button class="b" data-v="thorax">Lungs and diaphragm</button></div>
+    <div class="vr"><button class="b" data-r="alveolus" id="alvbtn" aria-pressed="false">Single alveolar unit</button></div>
+    <input type="checkbox" id="alvshow" hidden aria-hidden="true">
+    <div class="rowl" style="margin-top:8px"><span>Lung opacity</span></div>
+    <input type="range" id="lungop" min="0.1" max="1" step="0.01" value="0.82" aria-label="Lung opacity">
+    <h3 class="sub">The airway tubes</h3>
+    <div class="vr"><button class="b" data-r="trachea">Trachea</button><button class="b" data-r="bronchus">Bronchus</button><button class="b" data-r="bronchi">Bronchi</button><button class="b" data-r="larynx">Larynx</button><button class="b" data-r="pharynx">Pharynx</button><button class="b" data-r="oropharynx">Oropharynx</button><button class="b" data-r="nasopharynx">Nasopharynx</button><button class="b" data-r="nasal">Nasal cavity</button></div>
+    <h3 class="sub">Renal</h3>
+    <div class="vb"><button class="b" data-v="kidneys">Kidney</button><button class="b" data-v="kidneysback">Kidney from behind</button><button class="b" data-v="pelvis">Bladder and pelvis</button></div>
+    <h3 class="sub">Reproductive organs</h3>
+    <div class="vb"><button class="b" data-v="repro">Reproductive organs</button><button class="b" data-v="reproside">Reproductive pelvis from the side</button><button class="b" data-v="cycle">Ovaries and uterus close-up (female)</button><button class="b" data-v="breast">Breast (female)</button><button class="b" data-v="breastside">Breast from the side (female)</button></div>
     <div id="cyclebox" style="display:none">
       <label for="cycleday" style="font-size:12px">Menstrual cycle, day <b id="cycledayn">1</b> of 28: <span id="cyclephase">Menstruation</span></label>
       <input type="range" id="cycleday" min="1" max="28" step="1" value="1" aria-label="Menstrual cycle day">
       <p id="cyclenote" style="font-size:12px;line-height:1.45;margin:6px 0 0"></p>
     </div>
+    <h3 class="sub">Digestive</h3>
+    <div class="vr"><button class="b" data-r="oesophagus">Oesophagus</button><button class="b" data-r="stomach">Stomach</button><button class="b" data-r="smallint">Small intestine</button><button class="b" data-r="largeint">Large intestine</button><button class="b" data-r="liver">Liver, gallbladder, bile duct</button><button class="b" data-r="pancreas">Pancreas and pancreatic duct</button><button class="b" data-r="digestall">All digestive</button></div>
+    <h3 class="sub">Tonsils and lymphatic system</h3>
+    <div class="vr"><button class="b" data-r="tonsils">Tonsils</button><button class="b" data-r="lymphatic">Lymphatic system</button><button class="b" data-r="cervnodes">Cervical nodes</button><button class="b" data-r="peyer">Peyer's patches</button><button class="b" data-r="appendix">Appendix</button><button class="b" data-r="cisterna">Cisterna chyli</button><button class="b" data-r="nodes">Lymph nodes</button><button class="b" data-r="lymphvessels">Lymphatic vessels</button></div>
+    <div class="vr" style="margin-top:8px"><button class="b" data-r="reset">Reset</button></div>
   </div>
 
-  <div class="sec">
-    <h2>Upper limb</h2>
-    <div class="vb"><button class="b" data-v="arm">Shoulder and arm</button><button class="b" data-v="hand">Forearm and hand</button><button class="b" data-v="reset">Reset</button></div>
+  <div class="sec" id="g-arm">
+    <h2>5. Upper limb</h2>
+    <div class="vb"><button class="b" data-v="arm">Shoulder and arm</button><button class="b" data-v="hand">Forearm and hand</button><button class="b" data-r="reset">Reset</button></div>
   </div>
 
-  <div class="sec">
-    <h2>Lower limb</h2>
-    <div class="vb"><button class="b" data-v="thigh">Hip and thigh</button><button class="b" data-v="foot">Leg and foot</button><button class="b" data-v="reset">Reset</button></div>
+  <div class="sec" id="g-leg">
+    <h2>6. Lower limb</h2>
+    <div class="vb"><button class="b" data-v="thigh">Hip and thigh</button><button class="b" data-v="foot">Leg and foot</button><button class="b" data-r="reset">Reset</button></div>
+  </div>
   </div>
 
   <div class="sec" id="viewsec">
@@ -329,6 +360,7 @@
 <script type="module" src="perf.js"></script>
 <script type="module" src="search.js"></script>
 <script type="module" src="tree.js"></script>
+<script type="module" src="regions.js"></script>
 <script type="module" src="dock.js"></script>
 <script type="module" src="snapshot.js"></script>
 <script type="module" src="pins.js"></script>

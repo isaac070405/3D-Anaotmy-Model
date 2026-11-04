@@ -84,6 +84,7 @@ function layerOf(o) {
       return /prostat|Seminal vesicle|Ductus deferens|Ampulla|Ejaculatory|Bulbourethral|urethr|colliculus|utricle/i.test(label) ? 10 : 9;
     case 'endocrine': return /^Thymus/.test(label) ? 10 : 9;
     case 'senses': return 9;
+    case 'lymphatic': return /vessel|trunk|duct/i.test(label) ? 11 : 10;
     case 'nervous':
       if (/Dura mater|meninges/i.test(label)) return 8;
       if (/Choroid plexus/.test(label)) return 10;
