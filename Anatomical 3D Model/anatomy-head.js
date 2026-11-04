@@ -6,11 +6,13 @@ import { THREE, V, model, G, M, reg } from './anatomy-part1.js';
 const RS = 'respiratory', DG = 'digestive', SK = 'skeletal', SIDES = [-1, 1];
 const sd = s => (s < 0 ? 'right' : 'left'), tg = s => ' (' + sd(s) + ')';
 const DS = THREE.DoubleSide;
-model.updateMatrixWorld(true);
 const drop = (sys, rx) => { const gone = []; model.traverse(o => { if (o.isMesh && o.userData.sys === sys && rx.test(o.userData.label || '')) gone.push(o); }); gone.forEach(o => o.parent.remove(o)); return gone.length; };
 const add = (sys, name, geo, mt, label, pos) => { const m = new THREE.Mesh(geo, mt); if (pos) m.position.set(...pos); return reg(sys, name, m, { label }); };
 const tint = (base, hex, name) => { const m = base.clone(); m.name = name; m.color.setHex(hex); return m; };
 
+// the old placeholder meshes are made later in anatomy-part2.js, so this runs from there just before the model is handed to the stage
+export function buildHead() {
+model.updateMatrixWorld(true);
 // ───────── pharynx: three regions cut from the existing wall ─────────
 { let src = null; model.traverse(o => { if (o.isMesh && o.userData.sys === DG && o.userData.label === 'Pharynx') src = o; });
   if (src) {
@@ -118,4 +120,5 @@ drop(RS, /^(Thyroid cartilage|Cricoid cartilage|Arytenoid cartilage|Epiglottis$|
     const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i), x = p.getX(i); p.setZ(i, p.getZ(i) + 0.00022 * (x * 1000) ** 2 * 0.25 * (y / 0.0355) - 0.0000); }   // curl the sides forward, more toward the tip
     g.computeVertexNormals(); g.rotateX(-0.42); g.translate(0, 1.5072, 0.0170);
     add(RS, 'epiglottis', g, M('epiglottis', 0xb7cbbd, 0.4, { side: DS }), 'Epiglottis (leaf of elastic cartilage)'); }
+}
 }

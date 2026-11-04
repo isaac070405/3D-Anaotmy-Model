@@ -3,7 +3,7 @@ import './anatomy-extras.js';
 import './anatomy-alveolus.js';
 import './anatomy-tooth.js';
 import './anatomy-lymph.js';
-import './anatomy-head.js';
+import { buildHead } from './anatomy-head.js';
 
 
 // ───────── URINARY ─────────
@@ -1377,6 +1377,7 @@ let femaleOK = false;
   try { const fs = await fitBody('uploads/Female_Muscular_BaseMesh/Female/Female_Muscular_BaseMesh.glb', 'female_body'); fs.skin.forEach(m => SEXG.female.add(m)); fs.fat.forEach(m => FATG.female.add(m)); openings(fs.skin, SEXG.female, 'female'); femaleOK = true;
   } catch (e) { console.warn('Female body could not be loaded', e); }
 }
+buildHead();
 window.__anat = { G, SEXG, model, THREE, ready: true };
 stage.setObject(model);
 const vis = o => { while (o) { if (!o.visible) return false; o = o.parent; } return true; };
