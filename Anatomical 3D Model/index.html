@@ -134,6 +134,24 @@
   .sx{display:flex;gap:6px} .sx .b{flex:1} .sx .b.on{background:var(--color-accent-200)}
   .tones{display:flex;gap:6px;flex-wrap:wrap} .tones .t{width:30px;height:30px;padding:0;border:1px solid var(--color-neutral-700);border-radius:2px;cursor:pointer} .tones .t:hover{border-color:var(--color-accent-600)} .tones .t.on{outline:2px solid var(--color-accent);outline-offset:2px}
   #sexnote{font-size:12px;line-height:1.45;color:var(--color-neutral-700);margin:6px 0 0}
+  /* phones and small tablets: the side panel becomes a drawer opened from a bottom dock, so the 3D view keeps the whole screen */
+  #dock{display:none;position:fixed;left:0;right:0;bottom:0;z-index:7;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));box-sizing:border-box;background:color-mix(in oklab,var(--color-bg) 96%,transparent);border-top:1px solid var(--color-divider)}
+  #dock .b{flex:1;padding:10px 6px;font-size:12px}
+  #dock .b.on{background:var(--color-accent-200)}
+  @media (max-width:900px){
+    #dock{display:flex}
+    .panel{top:auto!important;left:8px!important;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px);visibility:hidden;transform:translateY(calc(100% + 80px));transition:transform .25s ease,visibility .25s}
+    body.drawer-open .panel{visibility:visible;transform:none}
+    body.present .panel{display:none}
+    #sliceopen{display:none!important}
+    #slicebox{left:8px;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px)}
+    #slice{margin-left:auto;margin-right:auto}
+    #camtools{top:8px!important;right:8px!important;max-width:calc(100vw - 16px)!important}
+    #exbar{left:8px!important;right:8px!important;top:64px!important}
+    #sbar{left:8px!important;right:8px;width:auto!important;bottom:62px!important}
+    #brainbox{left:8px;right:8px;max-height:calc(100vh - 80px)}
+    #tip{display:none!important}
+  }
 </style>
 </head>
 <body>
@@ -274,7 +292,7 @@
   <div class="sec info" id="info"></div>
 
   <div class="foot">Left and right are the figure's own. Drag to turn, scroll to zoom. Downloads include the systems currently shown, minus removed parts.</div>
-  <div class="foot" style="border-top:0;padding-top:4px"><b>Keys:</b> Space resets the view, H hides the selected part, U undoes, X toggles X-ray, 1 2 3 set the cut to transverse, coronal or sagittal.</div>
+  <div class="foot" style="border-top:0;padding-top:4px"><b>Keys:</b> Space resets the view, H hides the selected part, U undoes, X toggles X-ray, 1 2 3 set the cut to transverse, coronal or sagittal. Double-click a surface to leave a note on it.</div>
 </aside>
 
 <div id="slicebox">
@@ -311,5 +329,8 @@
 <script type="module" src="perf.js"></script>
 <script type="module" src="search.js"></script>
 <script type="module" src="tree.js"></script>
+<script type="module" src="dock.js"></script>
+<script type="module" src="snapshot.js"></script>
+<script type="module" src="pins.js"></script>
 </body>
 </html>
