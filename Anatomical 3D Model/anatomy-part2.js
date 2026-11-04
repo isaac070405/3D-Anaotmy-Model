@@ -3,6 +3,7 @@ import './anatomy-extras.js';
 import './anatomy-alveolus.js';
 import './anatomy-tooth.js';
 import './anatomy-lymph.js';
+import './anatomy-head.js';
 
 
 // ───────── URINARY ─────────
