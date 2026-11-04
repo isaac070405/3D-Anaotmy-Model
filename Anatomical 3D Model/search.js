@@ -112,9 +112,10 @@ function init() {
       else if (r.low.startsWith(q)) add(r, 90);
       else if (r.words.some(w => w.startsWith(q))) add(r, 80);
       else if (r.low.includes(q)) add(r, 70);
-      for (const t of targets) if (t.tg.some(w => r.low.includes(w))) add(r, 65, t.key);
-      // typos: every typed word must be within 1 edit (up to 5 letters) or 2 edits of some word in the name, or start it
-      if (!res.has(r.label) && qw.every(w => w.length >= 3)) {
+      // a phrase that is exactly an alias outranks incidental word matches ("belly" finds the stomach before the digastric belly); names that start with the target rank first
+      for (const t of targets) { const hit = t.tg.filter(w => r.low.includes(w)); if (hit.length) add(r, (t.key === q ? 85 : 65) + (hit.some(w => r.words.some(x => x.startsWith(w))) ? 3 : 0), t.key); }
+      // typos (words of 4+ letters only, short ones would match too much): every typed word must be within 1 edit (up to 5 letters) or 2 edits of some word in the name, or start it
+      if (!res.has(r.label) && qw.every(w => w.length >= 4)) {
         let d = 0, ok = true;
         for (const w of qw) { const max = w.length <= 5 ? 1 : 2; let best = max + 1;
           for (const x of r.words) { if (x.startsWith(w)) { best = 0; break; } const e = lev(w, x.slice(0, w.length + 1), max); if (e < best) best = e; }
