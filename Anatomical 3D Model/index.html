@@ -134,6 +134,24 @@
   .sx{display:flex;gap:6px} .sx .b{flex:1} .sx .b.on{background:var(--color-accent-200)}
   .tones{display:flex;gap:6px;flex-wrap:wrap} .tones .t{width:30px;height:30px;padding:0;border:1px solid var(--color-neutral-700);border-radius:2px;cursor:pointer} .tones .t:hover{border-color:var(--color-accent-600)} .tones .t.on{outline:2px solid var(--color-accent);outline-offset:2px}
   #sexnote{font-size:12px;line-height:1.45;color:var(--color-neutral-700);margin:6px 0 0}
+  /* phones and small tablets: the side panel becomes a drawer opened from a bottom dock, so the 3D view keeps the whole screen */
+  #dock{display:none;position:fixed;left:0;right:0;bottom:0;z-index:7;gap:6px;padding:8px 8px calc(8px + env(safe-area-inset-bottom));box-sizing:border-box;background:color-mix(in oklab,var(--color-bg) 96%,transparent);border-top:1px solid var(--color-divider)}
+  #dock .b{flex:1;padding:10px 6px;font-size:12px}
+  #dock .b.on{background:var(--color-accent-200)}
+  @media (max-width:900px){
+    #dock{display:flex}
+    .panel{top:auto!important;left:8px!important;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px);visibility:hidden;transform:translateY(calc(100% + 80px));transition:transform .25s ease,visibility .25s}
+    body.drawer-open .panel{visibility:visible;transform:none}
+    body.present .panel{display:none}
+    #sliceopen{display:none!important}
+    #slicebox{left:8px;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px)}
+    #slice{margin-left:auto;margin-right:auto}
+    #camtools{top:8px!important;right:8px!important;max-width:calc(100vw - 16px)!important}
+    #exbar{left:8px!important;right:8px!important;top:64px!important}
+    #sbar{left:8px!important;right:8px;width:auto!important;bottom:62px!important}
+    #brainbox{left:8px;right:8px;max-height:calc(100vh - 80px)}
+    #tip{display:none!important}
+  }
 </style>
 </head>
 <body>
@@ -144,6 +162,7 @@
   <div class="tw"><h2>Presentation</h2><div class="seg" id="tw-present"><button class="b" data-v="off">Explore</button><button class="b" data-v="on">Turntable</button></div><div class="note">Turntable hides the panels and slowly rotates the body.</div></div>
 </div>
 <div id="tip"></div>
+<div id="live" role="status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap"></div>
 
 <aside class="panel" data-comment-anchor="e05a1aae89-aside">
   <div class="kicker">Plate II · Systems of the body</div>
@@ -177,6 +196,12 @@
     <h2>Find a part</h2>
     <input class="inp" id="q" type="search" placeholder="Search a part, e.g. femur" aria-label="Search a part" autocomplete="off">
     <div id="qres" style="margin-top:6px"></div>
+  </div>
+
+  <div class="sec" id="treesec">
+    <h2>Browse by system</h2>
+    <div id="crumb" aria-live="polite">Nothing selected</div>
+    <div id="tree" role="tree" aria-label="Anatomy by system, group and part"></div>
   </div>
 
   <div class="sec">
@@ -249,6 +274,14 @@
     <div class="tick"><span>Skin</span><span>Muscle</span><span>Organs</span><span>Bone</span></div>
   </div>
 
+  <div class="sec" id="expsec">
+    <h2>Exploded view</h2>
+    <div class="rowl"><span>Spread parts apart</span><b id="expn">0%</b></div>
+    <input type="range" id="expsl" min="0" max="100" step="1" value="0" aria-label="Exploded view amount">
+    <div class="tick"><span>Assembled</span><span>Spread</span></div>
+    <p class="parts" id="expnote" style="margin-top:6px">Every structure moves away from the midline in proportion to its distance from it, and from front to back as well. Skin and fat stay in place.</p>
+  </div>
+
   <div class="sec">
     <h2>Dissect</h2>
     <div class="dz">Click any structure to select it. Its tab can hide it, and Undo brings hidden structures back.</div>
@@ -259,13 +292,14 @@
   <div class="sec info" id="info"></div>
 
   <div class="foot">Left and right are the figure's own. Drag to turn, scroll to zoom. Downloads include the systems currently shown, minus removed parts.</div>
+  <div class="foot" style="border-top:0;padding-top:4px"><b>Keys:</b> Space resets the view, H hides the selected part, U undoes, X toggles X-ray, 1 2 3 set the cut to transverse, coronal or sagittal. Double-click a surface to leave a note on it.</div>
 </aside>
 
 <div id="slicebox">
   <div class="hd" data-comment-anchor="8b0d1f82aa-div"><b>Cross-section</b><span style="display:flex;gap:6px;align-items:center"><button class="b hb" id="slicemin" aria-label="Minimise cross-section" title="Minimise">−</button><button class="b hb" id="slicebig" aria-label="Enlarge cross-section" title="Enlarge">⤢</button><button class="b hb" id="sliceclose" aria-label="Close cross-section" title="Close">×</button></span></div>
   <div id="slicebody">
   <div style="margin-bottom:8px"><select class="inp" id="axis" style="width:100%;padding:4px 8px;font-size:13px" aria-label="Cut axis"><option value="transverse">Transverse</option><option value="coronal">Coronal</option><option value="sagittal">Sagittal</option></select></div>
-  <canvas id="slice" width="548" height="400" aria-label="Cross-section colour map" title="Drag to move, scroll to zoom" data-comment-anchor="70aab8c984-canvas"></canvas>
+  <canvas id="slice" width="548" height="400" aria-label="Cross-section colour map" title="Click a colour to select it, drag to move, scroll to zoom" data-comment-anchor="70aab8c984-canvas"></canvas>
   <div class="zm"><button class="b" id="zout" aria-label="Zoom out">−</button><span id="zlab">100%</span><button class="b" id="zin" aria-label="Zoom in">+</button><button class="b" id="zfit" style="font-size:12px">Fit</button></div>
   <input type="range" id="sl" min="0" max="1" step="0.002" value="0.28" aria-label="Cut position" data-comment-anchor="bc0b8afe99-input">
   <div class="tick" id="slends" data-comment-anchor="a243fc1359-div"><span>Head</span><span>Foot</span></div>
@@ -289,5 +323,14 @@
 <script type="module" src="anatomy-part2.js"></script>
 <script type="module" src="layers.js"></script>
 <script type="module" src="explode.js"></script>
+<script type="module" src="camera-tools.js"></script>
+<script type="module" src="explode-slider.js"></script>
+<script type="module" src="shortcuts.js"></script>
+<script type="module" src="perf.js"></script>
+<script type="module" src="search.js"></script>
+<script type="module" src="tree.js"></script>
+<script type="module" src="dock.js"></script>
+<script type="module" src="snapshot.js"></script>
+<script type="module" src="pins.js"></script>
 </body>
 </html>

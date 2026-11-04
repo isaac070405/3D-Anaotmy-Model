@@ -1646,6 +1646,7 @@ function setPin(label, text) {
   if ([].concat(label).some(l => l.startsWith('Magnified')) && window.__alvG) { if (!$('alvshow').checked) { $('alvshow').checked = true; $('alvshow').onchange({ target: $('alvshow') }); } }
   const b = new THREE.Box3(); es.forEach(e => e.meshes.forEach(m => b.expandByObject(m))); pin.c = b.getCenter(new THREE.Vector3());
   $('pintxt').textContent = text || [].concat(label)[0]; pin.on = true; sel = es[0].sys; showInfo(); requestSlice(); trackPin();
+  if (window.__onPin) window.__onPin([].concat(label)[0], es[0].sys);
 }
 function clearPin() { pin.on = false; ['pinsvg'].forEach(i => $(i).style.display = 'none'); $('pinlbl').style.display = 'none'; }
 function trackPin() {
@@ -1662,6 +1663,7 @@ function trackPin() {
 }
 $('pinx').onclick = clearPin;
 $('q').addEventListener('input', e => {
+  if (window.__search) return;   // search.js takes over the results list
   if (!index) buildIndex();
   const q = e.target.value.trim().toLowerCase(), box = $('qres'); box.innerHTML = '';
   if (!q) return;
@@ -1669,6 +1671,16 @@ $('q').addEventListener('input', e => {
   if (!hits.length) { box.innerHTML = '<div style="font-size:12px;color:var(--color-neutral-700);padding:4px">No match</div>'; return; }
   hits.forEach(k => { const b = document.createElement('button'); b.className = 'res'; b.innerHTML = '<span></span><small></small>'; b.firstChild.textContent = k; b.lastChild.textContent = SYSNAME[index.get(k).sys]; b.onclick = () => { setPin(k); }; box.appendChild(b); });
 });
+// hooks for search.js and tree.js: the system and part lists, the part-name matcher the Parts list uses, and pinning
+window.__setPin = setPin;
+window.__tree = {
+  SYS, SYSNAME,
+  partMatches: (p, k) => { const q = p.toLowerCase().split(' (')[0].split(': ')[0], l = k.toLowerCase(); return k.startsWith(p.split(' (')[0]) || l.includes(q) || (q.includes(' and ') && q.split(' and ').some(w => w.length > 3 && l.includes(w))); },
+  labels: () => { if (!index) buildIndex(); return index; },
+  pick(sk, p) { if (!index) buildIndex(); const keys = [...index.keys()], q = p.toLowerCase().split(' (')[0].split(': ')[0];
+    const m = keys.filter(k => this.partMatches(p, k)).filter(k => index.get(k).sys === sk), hit = m.find(k => index.get(k).meshes.some(x => vis(x))) || m[0];
+    if (hit) setPin(sk === 'nervous' && m.length > 1 ? m : hit, p); return !!hit; },
+};
 $('q').addEventListener('keydown', e => { if (e.key === 'Enter') { const f = $('qres').querySelector('.res'); if (f) f.click(); } });
 
 // peel layers
@@ -1711,7 +1723,7 @@ const AX = {
   sagittal: { v: x => -0.3 + x * 0.6, ends: ['Right lateral', 'Left lateral'], x: 0.5 },
 };
 let axis = 'transverse';
-const LEG = [['Fat', '#e8c96a'], ['Bone', '#e6d8b8'], ['Muscle', '#a5473b'], ['Artery', '#b3322b'], ['Vein', '#3f5f8f'], ['Lung', '#d89a98'], ['Digestive', '#d68d81'], ['Kidney', '#9a4a3c'], ['Reproductive', '#c9866f'], ['Nerve', '#e8c452'], ['Brain and cord', '#d9b3ae']];
+const LEG = [['Fat', '#e8c96a'], ['Bone', '#e6d8b8'], ['Muscle', '#a5473b'], ['Artery', '#b3322b'], ['Vein', '#3f5f8f'], ['Lung', '#d89a98'], ['Digestive', '#d68d81'], ['Kidney', '#9a4a3c'], ['Reproductive', '#c9866f'], ['Nerve', '#e8c452'], ['Brain and cord', '#d9b3ae'], ['Selected', '#e8801a']];
 $('legend').innerHTML = LEG.map(([n, c]) => '<span><i style="background:' + c + '"></i>' + n + '</span>').join('');
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 0.008);
 let sliceOpen = true;
@@ -1747,7 +1759,9 @@ function renderSlice() {
   scene.children.forEach(o => { if (o !== model && o.visible) { o.visible = false; hid.push(o); } });
   Object.values(planes).forEach(p => { if (p.visible) { p.visible = false; hid.push(p); } });
   G.skin.visible = false; scene.background = null;
-  model.traverse(o => { if (o.isMesh) { swap.push([o, o.material]); o.material = bmat(o.material.color.getHex()); } });
+  // the structure selected in the 3D view (its tab is open) is drawn in amber on the cut as well
+  const selTab = $('sbar'), selLab = selTab && selTab.classList.contains('open') ? $('sbname').textContent : '';
+  model.traverse(o => { if (o.isMesh) { swap.push([o, o.material]); o.material = bmat(selLab && o.userData.label === selLab ? 0xe8801a : o.material.color.getHex()); } });
   r2.render(scene, cam);
   swap.forEach(([o, m]) => { o.material = m; }); hid.forEach(o => { o.visible = true; }); G.skin.visible = skinV; scene.background = bg;
   Object.entries(planes).forEach(([k, p]) => { p.visible = $('showplane').checked && k === axis; });
@@ -1757,6 +1771,33 @@ function setAxis(a) { axis = a; VW.x = 0; VW.y = 0; VW.z = 1; $('zlab').textCont
 $('axis').onchange = e => setAxis(e.target.value);
 $('sl').addEventListener('input', e => { AX[axis].x = +e.target.value; renderSlice(); });
 $('showplane').onchange = () => renderSlice();
+// click a coloured region of the cut to select that structure in the 3D view.
+// The slice camera looks along the cut normal and sees 8 mm past the plane, so a ray from the click, limited to that depth, finds the surface drawn there.
+window.requestSliceNow = requestSlice;
+{ const cv = $('slice'), rs = new THREE.Raycaster(), dbl = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }), nd = new THREE.Vector2(); let dn = null;
+  cv.addEventListener('pointerdown', e => { dn = [e.clientX, e.clientY, performance.now()]; });
+  cv.addEventListener('pointerup', e => {
+    if (!dn || e.button !== 0) return; const d = Math.hypot(e.clientX - dn[0], e.clientY - dn[1]), dt = performance.now() - dn[2]; dn = null; if (d > 5 || dt > 600) return;
+    const rc = cv.getBoundingClientRect(), cx = ((e.clientX - rc.left) / rc.width) * 2 - 1, cy = -((e.clientY - rc.top) / rc.height) * 2 + 1;
+    model.updateMatrixWorld(true); cam.updateMatrixWorld(true); rs.near = 0; rs.far = 0.0085;
+    // only meshes whose bounding sphere reaches into the 8 mm slab can be on screen
+    const nrm = cam.getWorldDirection(new THREE.Vector3()), sph = new THREE.Sphere(), dv = new THREE.Vector3(), ms = [], old = [];
+    model.traverse(o => { if (!o.isMesh || o.isInstancedMesh || o.userData.sys === 'skin' || !vis(o)) return;
+      const g = o.geometry; if (!g.boundingSphere) g.computeBoundingSphere(); sph.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);
+      const dd = dv.copy(sph.center).sub(cam.position).dot(nrm); if (dd + sph.radius >= 0 && dd - sph.radius <= 0.0085) { ms.push(o); old.push(o.material); o.material = dbl; } });
+    // walls of a cut tube are edge-on and about a pixel wide, so look at rings of points around the click, nearest ring first
+    let hit = null;
+    for (const [r, k] of [[0, 1], [2, 8], [4, 8], [6, 10], [9, 12]]) {
+      for (let i = 0; i < k && !hit; i++) {
+        const a = (i / k) * Math.PI * 2; nd.set(cx + Math.cos(a) * r * 2 / rc.width, cy + Math.sin(a) * r * 2 / rc.height); rs.setFromCamera(nd, cam);
+        const h = rs.intersectObjects(ms, false).find(x => x.object.userData.label); if (h) hit = h;
+      }
+      if (hit) break;
+    }
+    ms.forEach((o, i) => { o.material = old[i]; });
+    if (!hit || !window.__select) return;
+    window.__select(hit.object); requestSlice();
+  }); }
 ['change', 'click'].forEach(ev => document.addEventListener(ev, () => requestSlice()));
 setAxis('transverse'); setTimeout(requestSlice, 400);
 
