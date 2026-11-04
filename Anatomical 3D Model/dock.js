@@ -17,7 +17,7 @@ function init() {
   dock.addEventListener('click', e => {
     const b = e.target.closest('[data-d]'); if (!b) return;
     if (b.dataset.d === 'menu') drawer(!document.body.classList.contains('drawer-open'));
-    else if (b.dataset.d === 'search') { drawer(true); setTimeout(() => $('q').focus(), 280); }
+    else if (b.dataset.d === 'search') { drawer(true); setTimeout(() => $('q').focus(), 60); }
     else slice(!sliceShown());
   });
   addEventListener('keydown', e => { if (e.key === 'Escape' && document.body.classList.contains('drawer-open')) drawer(false); });

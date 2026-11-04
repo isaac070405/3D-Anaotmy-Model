@@ -40,7 +40,7 @@ function init() {
   const v = new THREE.Vector3();
   (function place() {
     requestAnimationFrame(place); if (!pins.length) return;
-    const rc = dom.getBoundingClientRect();
+    const rc = dom.getBoundingClientRect(); cam.updateMatrixWorld(); // the camera's inverse matrix is only refreshed on render, which can lag a frame behind
     for (const p of pins) {
       if (!vis(p.mesh)) { p.el.style.display = 'none'; continue; }
       v.copy(p.local); p.mesh.localToWorld(v); v.project(cam);
