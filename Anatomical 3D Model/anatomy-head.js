@@ -50,7 +50,7 @@ drop(RS, /nasal concha/i); drop(SK, /^Inferior nasal concha/);
     add(RS, 'inferior_concha_' + sd(s), scroll(s, prof.inf, 0.0016, 0.020, 0.042), mucosa, 'Inferior nasal concha (mucosa)' + tg(s));
     add(RS, 'middle_concha_' + sd(s), scroll(s, prof.mid, 0.0014, 0.026, 0.032), mucosa, 'Middle nasal concha' + tg(s));
     add(RS, 'superior_concha_' + sd(s), scroll(s, prof.sup, 0.0012, 0.026, 0.017), mucosa, 'Superior nasal concha' + tg(s));
-    add(RS, 'lateral_nasal_wall_' + sd(s), new THREE.BoxGeometry(0.0006, 0.046, 0.074), wallM, 'Lateral nasal wall (mucosa)' + tg(s), [s * (A + 0.0004), 1.603, 0.042]);
+    add(RS, 'lateral_nasal_wall_' + sd(s), new THREE.BoxGeometry(0.0006, 0.046, 0.074), wallM, 'Lateral nasal wall (mucosa)' + tg(s), [s * (A + 0.0013), 1.603, 0.042]);
     // meatuses lie under their conchae
     add(RS, 'superior_meatus_' + sd(s), new THREE.BoxGeometry(0.0016, 0.0040, 0.017), meatM, 'Superior meatus (posterior ethmoid cells open here)' + tg(s), [s * (A - 0.0004), 1.6130, 0.0345]);
     add(RS, 'middle_meatus_' + sd(s), new THREE.BoxGeometry(0.0016, 0.0042, 0.032), meatM, 'Middle meatus (frontal, maxillary and anterior ethmoid sinuses open here)' + tg(s), [s * (A - 0.0004), 1.6000, 0.042]);
