@@ -1711,7 +1711,7 @@ const AX = {
   sagittal: { v: x => -0.3 + x * 0.6, ends: ['Right lateral', 'Left lateral'], x: 0.5 },
 };
 let axis = 'transverse';
-const LEG = [['Fat', '#e8c96a'], ['Bone', '#e6d8b8'], ['Muscle', '#a5473b'], ['Artery', '#b3322b'], ['Vein', '#3f5f8f'], ['Lung', '#d89a98'], ['Digestive', '#d68d81'], ['Kidney', '#9a4a3c'], ['Reproductive', '#c9866f'], ['Nerve', '#e8c452'], ['Brain and cord', '#d9b3ae']];
+const LEG = [['Fat', '#e8c96a'], ['Bone', '#e6d8b8'], ['Muscle', '#a5473b'], ['Artery', '#b3322b'], ['Vein', '#3f5f8f'], ['Lung', '#d89a98'], ['Digestive', '#d68d81'], ['Kidney', '#9a4a3c'], ['Reproductive', '#c9866f'], ['Nerve', '#e8c452'], ['Brain and cord', '#d9b3ae'], ['Selected', '#e8801a']];
 $('legend').innerHTML = LEG.map(([n, c]) => '<span><i style="background:' + c + '"></i>' + n + '</span>').join('');
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 0.008);
 let sliceOpen = true;
@@ -1747,7 +1747,9 @@ function renderSlice() {
   scene.children.forEach(o => { if (o !== model && o.visible) { o.visible = false; hid.push(o); } });
   Object.values(planes).forEach(p => { if (p.visible) { p.visible = false; hid.push(p); } });
   G.skin.visible = false; scene.background = null;
-  model.traverse(o => { if (o.isMesh) { swap.push([o, o.material]); o.material = bmat(o.material.color.getHex()); } });
+  // the structure selected in the 3D view (its tab is open) is drawn in amber on the cut as well
+  const selTab = $('sbar'), selLab = selTab && selTab.classList.contains('open') ? $('sbname').textContent : '';
+  model.traverse(o => { if (o.isMesh) { swap.push([o, o.material]); o.material = bmat(selLab && o.userData.label === selLab ? 0xe8801a : o.material.color.getHex()); } });
   r2.render(scene, cam);
   swap.forEach(([o, m]) => { o.material = m; }); hid.forEach(o => { o.visible = true; }); G.skin.visible = skinV; scene.background = bg;
   Object.entries(planes).forEach(([k, p]) => { p.visible = $('showplane').checked && k === axis; });
@@ -1757,6 +1759,21 @@ function setAxis(a) { axis = a; VW.x = 0; VW.y = 0; VW.z = 1; $('zlab').textCont
 $('axis').onchange = e => setAxis(e.target.value);
 $('sl').addEventListener('input', e => { AX[axis].x = +e.target.value; renderSlice(); });
 $('showplane').onchange = () => renderSlice();
+// click a coloured region of the cut to select that structure in the 3D view.
+// The slice camera looks along the cut normal and sees 8 mm past the plane, so a ray from the click, limited to that depth, finds the surface drawn there.
+window.requestSliceNow = requestSlice;
+{ const cv = $('slice'), rs = new THREE.Raycaster(), dbl = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }), nd = new THREE.Vector2(); let dn = null;
+  cv.addEventListener('pointerdown', e => { dn = [e.clientX, e.clientY, performance.now()]; });
+  cv.addEventListener('pointerup', e => {
+    if (!dn || e.button !== 0) return; const d = Math.hypot(e.clientX - dn[0], e.clientY - dn[1]), dt = performance.now() - dn[2]; dn = null; if (d > 5 || dt > 600) return;
+    const rc = cv.getBoundingClientRect(); nd.set(((e.clientX - rc.left) / rc.width) * 2 - 1, -((e.clientY - rc.top) / rc.height) * 2 + 1);
+    model.updateMatrixWorld(true); rs.setFromCamera(nd, cam); rs.near = 0; rs.far = 0.0085;
+    // cut-open tubes are seen from inside, so back faces must count
+    const ms = [], old = []; model.traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.userData.sys !== 'skin' && vis(o)) { ms.push(o); old.push(o.material); o.material = dbl; } });
+    const hs = rs.intersectObjects(ms, false); ms.forEach((o, i) => { o.material = old[i]; });
+    const h = hs[0]; if (!h || !h.object.userData.label || !window.__select) return;
+    window.__select(h.object); requestSlice();
+  }); }
 ['change', 'click'].forEach(ev => document.addEventListener(ev, () => requestSlice()));
 setAxis('transverse'); setTimeout(requestSlice, 400);
 
