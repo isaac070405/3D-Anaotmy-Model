@@ -140,14 +140,14 @@
   #dock .b.on{background:var(--color-accent-200)}
   @media (max-width:900px){
     #dock{display:flex}
-    .panel{top:auto!important;left:8px!important;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px);visibility:hidden;transform:translateY(calc(100% + 80px));transition:transform .25s ease,visibility 0s linear .25s}
+    .panel{z-index:6;top:auto!important;left:8px!important;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px);visibility:hidden;transform:translateY(calc(100% + 80px));transition:transform .25s ease,visibility 0s linear .25s}
     body.drawer-open .panel{visibility:visible;transform:none;transition-delay:0s}
     body.present .panel{display:none}
     #sliceopen{display:none!important}
     #slicebox{left:8px;right:8px;bottom:62px;width:auto!important;max-height:calc(100vh - 150px)}
     #slice{margin-left:auto;margin-right:auto}
     #camtools{top:8px!important;right:8px!important;max-width:calc(100vw - 16px)!important}
-    #exbar{left:8px!important;right:8px!important;top:64px!important}
+    #exbar{left:8px!important;right:8px!important;top:128px!important}
     #sbar{left:8px!important;right:8px;width:auto!important;bottom:62px!important}
     #brainbox{left:8px;right:8px;max-height:calc(100vh - 80px)}
     #tip{display:none!important}
