@@ -156,3 +156,13 @@ _107 listed parts._
 - Reproductive system has male and female variants, switched with the Sex control; penis shown flaccid.
 - The female body mesh (`uploads/Female_Muscular_BaseMesh`) is not in the repository. Without it the generic body surface stays on, minus the male genitalia, and the female structures still show.
 - The menstrual cycle slider (day 1 to 28) changes endometrial thickness, the dominant follicle on the right ovary, the released oocyte on day 14 and the corpus luteum in the luteal phase.
+
+## Body part views (panel groups 1 to 6)
+
+- The side panel lists body-part views in six groups: brain and spine, head, neck, thoracic and abdominal cavity, upper limb, lower limb. Each button shows one set of structures and flies the camera to them. Press the active button again, or Reset, to bring everything back.
+- Head: eye, outer, middle, inner and whole ear, nasal cavity, oral cavity, teeth, oral cavity with teeth, skull and teeth. Nasal, oral and pharynx views cut the body in the midline and show the right half from the left.
+- Single tooth: a magnified canine cut lengthwise (enamel, dentin and its tubules, pulp chamber and root canal, cementum, periodontal ligament, alveolar bone, gingiva, apical foramen, nerve, artery and vein), beside the figure like the alveolar unit.
+- Single alveolar unit: terminal bronchiole to alveolar sac, one capillary network per alveolus (blue arriving, red leaving), pores of Kohn, a cutaway wall with type I and II pneumocytes and a macrophage, and a blood-air barrier inset.
+- Thoracic and abdominal cavity: heart (eight great vessels, chambers and valves, coronary arteries and veins), lungs and diaphragm, airway tubes (trachea, bronchus, bronchi, larynx, pharynx, oropharynx, nasopharynx, nasal cavity), renal, reproductive, digestive (oesophagus, stomach, small and large intestine, liver with gallbladder and bile duct, pancreas with its duct, all digestive), tonsils, lymphatic system.
+- Lymphatic system: a new system with node groups of the head and neck, thorax, abdomen, pelvis and limbs, and the vessels, trunks and ducts that join them. The lymphatic views also gather the thoracic duct, cisterna chyli, tonsils, spleen, thymus, Peyer's patches and appendix from the systems that hold them.
+- Rebuilt: the nasal cavity (scrolled conchae, meatuses, olfactory region, vestibule), the larynx (thyroid, cricoid, arytenoid and epiglottic cartilages, true and false vocal folds) and the pharynx, now split into nasopharynx, oropharynx and laryngopharynx.
