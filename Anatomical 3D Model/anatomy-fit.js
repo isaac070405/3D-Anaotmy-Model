@@ -27,14 +27,16 @@ export function merge(list) {
 // a copy of a left-side geometry for the right side (x flipped, triangle order reversed so the faces keep pointing outward)
 export function mirror(g, s) {
   if (s > 0) return g; g = g.clone(); g.scale(-1, 1, 1);
-  if (g.index) { const a = g.index.array; for (let i = 0; i < a.length; i += 3) { const t = a[i + 1]; a[i + 1] = a[i + 2]; a[i + 2] = t; } g.index.needsUpdate = true; } g.computeVertexNormals(); return g;
+  if (g.index) { const a = g.index.array; for (let i = 0; i < a.length; i += 3) { const t = a[i + 1]; a[i + 1] = a[i + 2]; a[i + 2] = t; } g.index.needsUpdate = true; }
+  else for (const k in g.attributes) { const at = g.attributes[k], n = at.itemSize; for (let i = 0; i + 2 < at.count; i += 3) for (let c = 0; c < n; c++) { const t = at.array[(i + 1) * n + c]; at.array[(i + 1) * n + c] = at.array[(i + 2) * n + c]; at.array[(i + 2) * n + c] = t; } }
+  g.computeVertexNormals(); return g;
 }
 
 // a closed tube of elliptical cross-section along a path; sec(u) gives [semi-axis along the side vector, semi-axis along the normal, offset along side, offset along normal]
 export function loft(path, sec, o = {}) {
   const nu = o.nu ?? 40, nv = o.nv ?? 20, side = o.side || V(1, 0, 0), pos = [], idx = [], col = [], c = new THREE.Color();
   for (let i = 0; i <= nu; i++) { const u = i / nu, p = path.getPointAt(u), T = path.getTangentAt(u).normalize();
-    const S = side.clone().addScaledVector(T, -side.dot(T)).normalize(), N = new THREE.Vector3().crossVectors(T, S).normalize(), [w, h, dx = 0, dn = 0] = sec(u);
+    const sv = Math.abs(side.dot(T)) > 0.95 ? V(0, 1, 0) : side, S = sv.clone().addScaledVector(T, -sv.dot(T)).normalize(), N = new THREE.Vector3().crossVectors(T, S).normalize(), [w, h, dx = 0, dn = 0] = sec(u);
     for (let j = 0; j <= nv; j++) { const a = (j / nv) * Math.PI * 2, q = p.clone().addScaledVector(S, w * Math.cos(a) + dx).addScaledVector(N, h * Math.sin(a) + dn); pos.push(q.x, q.y, q.z);
       if (o.col) { c.setHex(o.col(u, a)); col.push(c.r, c.g, c.b); } } }
   for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) { const a = i * (nv + 1) + j, b = a + nv + 1; idx.push(a, a + 1, b, b, a + 1, b + 1); }

@@ -3,7 +3,7 @@
 // trachea with a bridging isthmus, a pyramidal lobe and flat parathyroid glands; the carotid sinus and body; the cervical plexus branches; and the
 // ascending pharyngeal artery. The old single-strip sternocleidomastoid and omohyoid, and the ellipsoid thyroid, are removed first.
 // Runs from anatomy-part2.js after the oral cavity. Coordinates are metres, +x is the figure's left, +y up, +z forward.
-import { THREE, V, M, belly, mm, tube, mat } from './anatomy-part1.js';
+import { THREE, V, M, belly, mm, tube, mat, model } from './anatomy-part1.js';
 import { DS, sd, tg, ss, drop, find, verts, merge, mirror, loft, curve, ridge, grid, blob, place, add } from './anatomy-fit.js';
 
 const MS = 'muscular', EN = 'endocrine', CS = 'circulatory', NS = 'nervous', SIDES = [-1, 1], PI = Math.PI;
@@ -83,4 +83,25 @@ export function buildNeck() {
     nv('transverse_cervical_nerve', 'Transverse cervical nerve (C2, C3)', [[0.0440, 1.5055, -0.0390], E, [0.0350, 1.5000, 0.0410], [0.0150, 1.5050, 0.0500]], 0.0005);
     [['medial', [0.0500, 1.4900, 0.0100], [0.0450, 1.4400, 0.0450], [0.0350, 1.3800, 0.0800]], ['intermediate', [0.0500, 1.4900, 0.0100], [0.0580, 1.4400, 0.0350], [0.0600, 1.3850, 0.0650]], ['lateral', [0.0500, 1.4900, 0.0100], [0.0700, 1.4500, 0.0200], [0.0900, 1.4050, 0.0200]]]
       .forEach(([k, ...pts]) => nv('supraclavicular_nerve_' + k, 'Supraclavicular nerves (C3, C4), ' + k + ' branch', pts, 0.0005)); }); }
+  fitGut();
+}
+
+// The oesophagus, the laryngopharynx and the middle and inferior constrictors were drawn as round tubes whose back wall ran 5 to 7 mm into the C2 to C6 vertebral bodies.
+// Each vertex behind the front of the spine (plus a 4.5 mm prevertebral layer for longus colli and the fascia) is pushed forward onto that plane, so the back wall lies flat
+// on the spine. The effect fades out above C2 (y 1.537 to 1.552) and sideways beyond the width of the vertebral body.
+function fitGut() {
+  const bodies = [];
+  for (const k of ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'T1', 'T2', 'T3', 'T4']) { let best = null;
+    model.traverse(o => { if (o.isMesh && o.userData.sys === 'skeletal' && o.userData.label === 'Vertebra ' + k) { const b = new THREE.Box3().setFromObject(o), c = b.getCenter(new THREE.Vector3()); if (Math.abs(c.x) < 0.004 && (!best || b.max.z > best.z)) best = { y: c.y, z: b.max.z }; } });
+    if (best) bodies.push(best); }
+  if (bodies.length < 3) return; bodies.sort((a, b) => a.y - b.y);
+  const zFront = y => { if (y <= bodies[0].y) return bodies[0].z; for (let i = 1; i < bodies.length; i++) if (y <= bodies[i].y) { const a = bodies[i - 1], b = bodies[i], t = (y - a.y) / (b.y - a.y); return a.z + (b.z - a.z) * t; } return bodies[bodies.length - 1].z; };
+  const targets = []; model.traverse(o => { if (!o.isMesh) return; const l = o.userData.label || '', sy = o.userData.sys;
+    if ((sy === 'digestive' && /^(Laryngopharynx|Esophag)/.test(l)) || (sy === 'muscular' && /^(Middle|Inferior) pharyngeal constrictor/.test(l))) targets.push(o); });
+  const v = new THREE.Vector3();
+  targets.forEach(o => { o.updateWorldMatrix(true, false); const inv = new THREE.Matrix4().copy(o.matrixWorld).invert(), p = o.geometry.attributes.position; let moved = 0;
+    for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).applyMatrix4(o.matrixWorld); if (v.y < 1.30 || v.y > 1.552) continue;
+      const wx = 1 - ss(0.011, 0.0135, Math.abs(v.x)), wy = 1 - ss(1.537, 1.552, v.y), zmin = zFront(v.y) + 0.0045, d = zmin - v.z; if (d <= 0) continue;
+      v.z += d * wx * wy; moved++; v.applyMatrix4(inv); p.setXYZ(i, v.x, v.y, v.z); }
+    if (moved) { p.needsUpdate = true; if (o.geometry.index) o.geometry.computeVertexNormals(); o.geometry.computeBoundingBox(); o.geometry.computeBoundingSphere(); } });
 }
