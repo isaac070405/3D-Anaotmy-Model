@@ -1,8 +1,8 @@
 # Nervous
 
-> **Parts listed:** 131 · [All systems](Home#systems) · Left and right copies count once.
+> **Parts listed:** 135 · [All systems](Home#systems) · Left and right copies count once.
 
-- **Face, jaw, orbit and larynx:** Infraorbital nerve, Zygomatic nerve, Superior alveolar nerves, Pterygopalatine ganglion, Inferior alveolar nerve, Mental nerve, Lingual nerve, Buccal nerve, Auriculotemporal nerve, Masseteric nerve, Mylohyoid nerve, Deep temporal nerves, Frontal nerve, Lacrimal nerve, Ciliary ganglion, Short ciliary nerves, Superior laryngeal nerve, Recurrent laryngeal nerve, Ansa cervicalis, Cochlear root (CN VIII), Vestibular root (CN VIII)
+- **Face, jaw, orbit and larynx:** Infraorbital nerve, Zygomatic nerve, Superior alveolar nerves, Pterygopalatine ganglion, Inferior alveolar nerve, Mental nerve, Lingual nerve, Buccal nerve, Auriculotemporal nerve, Masseteric nerve, Mylohyoid nerve, Deep temporal nerves, Frontal nerve, Lacrimal nerve, Ciliary ganglion, Short ciliary nerves, Superior laryngeal nerve, Recurrent laryngeal nerve, Ansa cervicalis, Lesser occipital nerve, Great auricular nerve, Transverse cervical nerve, Supraclavicular nerves, Cochlear root (CN VIII), Vestibular root (CN VIII)
 - **Cerebrum:** Cerebral cortex, Cerebral white matter
 - **Deep structures:** Corpus callosum, Septum pellucidum, Fornix, Anterior commissure, Thalamus, Pulvinar, Lateral geniculate body, Interthalamic adhesion, Hypothalamus, Mammillary body, Subthalamic nucleus, Pineal gland, Infundibulum, Adenohypophysis, Neurohypophysis, Optic chiasm, Optic tract, Caudate nucleus, Putamen, Globus pallidus, Amygdala, Hippocampus, Internal capsule
 - **Ventricular system:** Lateral ventricle, 3rd ventricle, Interventricular foramen, Cerebral aqueduct, 4th ventricle, Choroid plexus, Central canal
@@ -14,7 +14,7 @@
 - **Leg:** Lumbosacral plexus, Femoral nerve, Saphenous nerve, Sciatic nerve, Tibial nerve, Common fibular nerve, Deep fibular nerve, Superficial fibular nerve, Medial sural cutaneous nerve, Lateral sural cutaneous nerve, Sural communicating nerve, Sural nerve
 - **Also modelled, not in the sidebar list:** Brachial plexus, C6, C7, C8 and T1 roots, Sympathetic trunk, Sympathetic ganglion
 
-_128 listed parts plus 3 more._
+_132 listed parts plus 3 more._
 
 ---
 [← Endocrine (thyroid, parathyroid, thymus)](System-Endocrine-thyroid-parathyroid-thymus) · [Interface →](Interface)

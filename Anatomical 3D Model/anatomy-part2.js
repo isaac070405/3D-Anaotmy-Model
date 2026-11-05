@@ -4,6 +4,8 @@ import './anatomy-alveolus.js';
 import './anatomy-tooth.js';
 import './anatomy-lymph.js';
 import { buildHead } from './anatomy-head.js';
+import { buildOral } from './anatomy-oral.js';
+import { buildNeck } from './anatomy-neck.js';
 
 
 // ───────── URINARY ─────────
@@ -1378,6 +1380,8 @@ let femaleOK = false;
   } catch (e) { console.warn('Female body could not be loaded', e); }
 }
 buildHead();
+buildOral();
+buildNeck();
 window.__anat = { G, SEXG, model, THREE, ready: true };
 stage.setObject(model);
 const vis = o => { while (o) { if (!o.visible) return false; o = o.parent; } return true; };
