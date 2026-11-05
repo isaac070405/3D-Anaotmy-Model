@@ -30,11 +30,11 @@ const MUSCLE = [
   // not in the list: placed by depth
   [3, /^(Platysma|Orbicularis|Zygomaticus|Depressor anguli|Procerus|Masseter|Temporalis|Buccinator)/],
   [4, /^(Rhomboid|Levator scapulae|Splenius|Internal oblique|Teres minor|Pectoralis minor|Omohyoid|Digastric|Sternohyoid)/],
-  [6, /^(Subclavius|Obliquus capitis|Rectus capitis|Genioglossus|Hyoglossus|Styloglossus|Stylohyoid|Levator palpebrae|(Superior|Inferior|Lateral|Medial) (rectus|oblique)|Geniohyoid)/],
-  [7, /^(Superior pharyngeal|Middle pharyngeal|Inferior pharyngeal|Palatopharyngeus|Levator veli|Cricothyroid|Lateral cricoarytenoid|Posterior cricoarytenoid|Thyroarytenoid|Vocalis|Oblique arytenoid|Transverse arytenoid|Internal intercostal|External intercostal|Transversus abdominis)/],
+  [6, /^(Subclavius|Scalenus|Palatoglossus|Pterygomandibular|Obliquus capitis|Rectus capitis|Genioglossus|Hyoglossus|Styloglossus|Stylohyoid|Levator palpebrae|(Superior|Inferior|Lateral|Medial) (rectus|oblique)|Geniohyoid)|muscle of the tongue/],
+  [7, /^(Longus|Tensor veli|Salpingopharyngeus|Musculus uvulae|Superior pharyngeal|Middle pharyngeal|Inferior pharyngeal|Palatopharyngeus|Levator veli|Cricothyroid|Lateral cricoarytenoid|Posterior cricoarytenoid|Thyroarytenoid|Vocalis|Oblique arytenoid|Transverse arytenoid|Internal intercostal|External intercostal|Transversus abdominis)/],
 ];
 const SUPERFICIAL_VEIN = /^(Great saphenous|Small saphenous|External jugular|Median (antebrachial|cubital)|Cephalic|Basilic|Dorsal venous network|Facial vein|Superficial temporal vein|Supraorbital vein|Supratrochlear vein|Retromandibular)/;
-const VESSEL = /artery|arteries|vein|veins|vessel|plexus|lymphatic|aorta|aortic arch|trunk|vena cava|sinus/i;
+const VESSEL = /artery|arteries|vein|veins|vessel|plexus|lymphatic|aorta|aortic arch|trunk|vena cava|sinus|carotid body/i;
 const NERVE = /nerve|plexus|ganglion|sympathetic|vagus|trunk|cauda equina|ansa|filum|root|ramus|rami|spinal cord|conus medullaris/i;
 
 const stem = l => l.replace(/\s*\((right|left)\)/g, '');
@@ -65,6 +65,7 @@ function layerOf(o) {
       if (VESSEL.test(label)) return 11;
       if (/muscle layer|sphincter|Suspensory muscle/i.test(label)) return 7;
       if (/bile duct|biliary|cystic|hepatic duct/i.test(label)) return 10;
+      if (/^(Upper lip|Lower lip|Labial|Alveolar mucosa|Parotid|Submandibular|Sublingual gland)/.test(label)) return 9;   // lips, vestibule lining and the salivary glands sit with the anterior organs
       return /Liver|Gallbladder|Stomach|Gastric|curvature|Angular incisure|Cardiac notch|Transverse colon|Cecum|Caecum|Vermiform|Appendix/i.test(label) ? 9 : 10;
     case 'urinary':
       if (/Renal capsule|Renal sinus fat/.test(label)) return 8;
